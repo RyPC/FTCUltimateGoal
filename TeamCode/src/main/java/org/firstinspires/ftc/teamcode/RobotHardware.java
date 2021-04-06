@@ -17,10 +17,21 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Const;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.lang.annotation.ElementType;
 import java.security.spec.EllipticCurve;
@@ -30,9 +41,14 @@ public class RobotHardware {
     // declare imu
     BNO055IMU imu;
 
-    //declaring variables to wait in code
-    private ElapsedTime waitTime = new ElapsedTime();
+    //random constants
     Constants constants = new Constants();
+
+    //camera view in phone
+    int cameraMonitorViewId;
+    //declaring camera
+    public WebcamName webcamName;
+    public OpenCvCamera camera;
 
     //declaring motors
     //shooter motor
@@ -47,6 +63,7 @@ public class RobotHardware {
     //servos
     public Servo wobbleClamp;
     public Servo wobbleArm;
+    public Servo blocker;
 
     LinearOpMode op;
     Telemetry telemetry;
@@ -62,7 +79,6 @@ public class RobotHardware {
     //gets imu angle
     public double getAngle() {
         return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-
     }
     //initialization
     public void init (HardwareMap hwMap, boolean initServos) {
@@ -82,24 +98,22 @@ public class RobotHardware {
         //wobble arm
         wobbleArm = hwMap.get(Servo.class, "wobbleArm");
         wobbleClamp = hwMap.get(Servo.class, "wobbleClamp");
+        //shooter blocker
+        blocker = hwMap.get(Servo.class, "blocker");
+        //camera
+        webcamName = hwMap.get(WebcamName.class, "Looky");
+        cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
 
         //reset encoders
-        fr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        br.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        resetEncoders();
 
         //set motor mode
         shooter.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         cleanser.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //zero power behavior
-        shooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        shooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -109,10 +123,10 @@ public class RobotHardware {
 
         //setting direction of motors (none of them were black to red and red to black don't worry)
         shooter.setDirection(DcMotorEx.Direction.REVERSE);
-        fr.setDirection(DcMotorSimple.Direction.FORWARD);
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
-        br.setDirection(DcMotorSimple.Direction.REVERSE);
-        bl.setDirection(DcMotorSimple.Direction.REVERSE);
+        fr.setDirection(DcMotorSimple.Direction.REVERSE);
+        fl.setDirection(DcMotorSimple.Direction.FORWARD);
+        br.setDirection(DcMotorSimple.Direction.FORWARD);
+        bl.setDirection(DcMotorSimple.Direction.FORWARD);
         cleanser.setDirection(DcMotorSimple.Direction.FORWARD);
         intake.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -135,6 +149,9 @@ public class RobotHardware {
         imu = hwMap.get(BNO055IMU.class, "imu");
         resetGyro();
 
+        //live camera
+        camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
+
         telemetry.addLine("Ready to Start");
         telemetry.update();
 
@@ -143,7 +160,8 @@ public class RobotHardware {
     //initialize Servos
     public void initServos() {
         wobbleArm.setPosition(constants.armUp);
-        wobbleClamp.setPosition(constants.clampUp);
+        wobbleClamp.setPosition(constants.clampClosed);
+        blocker.setPosition(constants.blockerUp);
     }
 
     //reset imu
@@ -237,65 +255,102 @@ public class RobotHardware {
     }
 
     //turn to given angle based on imu
-    public void turnTo(int angle) {
-        angle = -angle;
-        float currentAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+    public void turnTo(int angle, double turnSpeed) {
+        double currentAngle = getAngle();
         while (Math.abs(currentAngle - angle) > 1 && op.opModeIsActive()) {
-            if (angle < currentAngle) {
-                turn(0.25, 50);
+
+
+            //least of two power lines
+
+            double power;
+            if (Math.abs(currentAngle - angle) < 90) {
+                power = ((angle == 180 && currentAngle < 0 ? 180 * 2 + currentAngle : currentAngle) - angle) / (30 / turnSpeed);
+                power = power > 0 && power < 0.25 ? 0.25 : power < 0 && power > -0.25 ? -0.25 : power;
             }
             else {
-                turn(-0.25, 50);
+                power = 0.25;
             }
+//            double power = 0.25;
 
-            currentAngle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            fr.setPower(-power);
+            fl.setPower(power);
+            br.setPower(-power);
+            bl.setPower(power);
+
+            currentAngle = getAngle();
 
             telemetry.addData("imu", currentAngle);
+            telemetry.addData("power", power);
             telemetry.update();
         }
+
+        brake();
         sleep(250);
+    }
+    public void turnTo(int angle) {
+        turnTo(angle, 1);
     }
     //move based on encoders and imu correction
     public void moveTo(int x, int y) {
         resetEncoders();
 
-//        x*= 1.3;
-//        y*= 1.3;
-        double angle = Math.atan((double)x/y) / Math.PI * 180;
-//        if (y < 0)
-//            angle = x >= 0 ? angle + 180 : angle - 180;
+        //angle of path taken
+        double angle = Math.atan((double)x / y) / Math.PI * 180;
+        //total distance need to be traveled determined by \sqrt(x^2 + y^2)
         double hypotenuse = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-        double xPower = x/hypotenuse;
-        double yPower = y/hypotenuse;
-        double cos = Math.cos(angle * Math.PI / 90);
+        //initial angle of the robot
+        double initialAngle = getAngle();
+
+//        double xPower = x/hypotenuse;
+//        double yPower = y/hypotenuse;
+
+        //cos needed to find the power output of the different motors
+        double cos = Math.cos(angle * 2 * Math.PI / 360 * 2);
+
+        //neededTicks: ticks needed to reach the end of the path
+        //currentTicks: current number of ticks traveled from the start of the moveTo() function
         double neededTicks = hypotenuse * constants.ticksPerTok;
-        double currentTicks = angle >= 0 ? fl.getCurrentPosition() : fr.getCurrentPosition();
+        double currentTicks = 0;
 
         while (neededTicks > currentTicks && op.opModeIsActive()) {
-            currentTicks = angle >= 0 ? -fl.getCurrentPosition() : fr.getCurrentPosition();
-            double power = -4 / Math.pow(neededTicks, 2) * Math.pow((currentTicks - neededTicks/2), 2) + 1;
-            power = power < 0.25 && currentTicks < neededTicks / 2 ? 0.25 : power;
-            (angle >= 0 ? fl : fr).setPower(power);
-            (angle >= 0 ? br : bl).setPower(power);
 
-            (angle >= 0 ? fr : fl).setPower(power * cos);
-            (angle >= 0 ? bl : br).setPower(power * cos);
+            currentTicks = angle >= 0 ? fl.getCurrentPosition() : -fr.getCurrentPosition();
 
+            //least of two power lines
+            double power1 = 0.25 + ((1.0 / 1890) * currentTicks);
+            double power2 = -((1.0 / 1890) * currentTicks) + (0.25 + neededTicks / 1890);
+            double power = Math.min(power1, power2);
+
+            //correction based on imu
+            double currentAngle = getAngle();
+            double correction = (currentAngle - initialAngle) / 30;
+
+            //sets power of 4 motors
+            power = power < 0.25 && currentTicks < neededTicks / 2 ? 0.25 : power < 0 ? -0.25 : power;
+            double highPower = power * (angle < 0 ? 1 : cos) - correction;
+            double lowPower = power * (angle < 0 ? cos : 1) + correction;
+            fr.setPower(highPower);
+            fl.setPower(lowPower);
+            br.setPower(highPower);
+            bl.setPower(lowPower);
+
+            //telemetry
             telemetry.addData("angle", angle);
-            telemetry.addData("needed ticks", neededTicks);
-            telemetry.addData("current ticks", currentTicks);
-            telemetry.addData("power", power);
+            telemetry.addLine(currentTicks + " / " + neededTicks + " ticks");
+            telemetry.addData("high", highPower);
+            telemetry.addData("low", lowPower);
+
             telemetry.update();
         }
-        sleep(1000);
+        brake();
     }
-    public void driveTo(int inches) {
+
+    public void driveTo(int inches, boolean shoot, int angle) {
         resetEncoders();
         double neededTicks = inches * constants.ticksPerTok;
-        double currentTicks = fr.getCurrentPosition();
-        double initialAngle = getAngle();
+        double currentTicks = -fr.getCurrentPosition();
         while (Math.abs(currentTicks - neededTicks) > 50 && op.opModeIsActive()) {
-            currentTicks = fr.getCurrentPosition();
+            currentTicks = -fr.getCurrentPosition();
             //standard deviation-like power curve:
             //  e^(-(x-mu)^2/a)
             //  starts and ends at 2 standard deviations away from the mean
@@ -318,41 +373,66 @@ public class RobotHardware {
 //    \/
 //    /\
 //   /  \
-            double power1 = 0.25 + ((1.0 / 567) * currentTicks);
-            double power2 = -((1.0 / 567) * currentTicks) + (0.25 + -((1.0 / 567) * currentTicks));
-            double power = power1 < power2 ? power1 : power2;
+            double power1 = 0.25 + ((1.0 / 1890) * currentTicks);
+            double power2 = -((1.0 / 1890) * currentTicks) + (0.25 + neededTicks / 1890.0);
+            double power = Math.min(power1, power2);
             double currentAngle = getAngle();
 
-            power = power < 0.2 && currentTicks > neededTicks ? -0.2 : power < 0.2 ? 0.2 : power;
+            power = power < 0.25 && currentTicks > neededTicks ? -0.25 : Math.max(power, 0.25);
 
-            double correction = (currentAngle - initialAngle) / 30;
+            //sets correction for motor power based off of imu
+            double correction = (currentAngle - (double) angle) / 30;
 
+            //sets motor power
             fr.setPower(power - correction);
             fl.setPower(power + correction);
             br.setPower(power - correction);
             bl.setPower(power + correction);
 
+            //shoots if shooter is at speed
+            if (shoot) {
+                if (Math.abs(shooter.getVelocity() - constants.shooterPower) < 75) {
+                    cleanser.setPower(0.25);
+                    intake.setPower(0.5);
+                } else {
+                    cleanser.setPower(0);
+                    intake.setPower(0);
+                }
+            }
+
+
             telemetry.addData("needed", neededTicks);
             telemetry.addData("current", currentTicks);
             telemetry.addData("power", power);
+            telemetry.addData("angle", (double) angle);
             telemetry.update();
         }
         brake();
     }
+    public void driveTo(int inches) {
+        driveTo(inches, false, 0);
+    }
+    public void driveTo(int inches, int angle) {
+        driveTo(inches, false, angle);
+    }
     public void strafeTo(int inches) {
+        ElapsedTime time = new ElapsedTime();
+        time.reset();
+
+        inches*= -1.33;
         resetEncoders();
         double neededTicks = inches * constants.ticksPerTok;
-        double currentTicks = fr.getCurrentPosition();
+        double currentTicks = 0;
         double initialAngle = getAngle();
-        while (Math.abs(currentTicks - neededTicks) > 50 && op.opModeIsActive()) {
-            currentTicks = fr.getCurrentPosition();
+        while (Math.abs(currentTicks - neededTicks) > 50 && op.opModeIsActive() && time.milliseconds() < 5000) {
+            currentTicks = -fr.getCurrentPosition();
 
-            double power1 = 0.25 + ((1.0 / 567) * currentTicks);
-            double power2 = -((1.0 / 567) * currentTicks) + (0.25 + -((1.0 / 567) * currentTicks));
-            double power = power1 < power2 ? power1 : power2;
+            double power1 = 0.25 + ((1.0 / 1890) * currentTicks);
+            double power2 = -((1.0 / 1890) * currentTicks) + (0.25 + neededTicks / 1890);
+            double power = Math.min(power1, power2);
             double currentAngle = getAngle();
 
-            power = power < 0.2 && currentTicks > neededTicks ? -0.2 : power < 0.2 ? 0.2 : power;
+            power = power < 0.25 && currentTicks > neededTicks ? -0.25 : Math.max(power, 0.25);
 
             double correction = (currentAngle - initialAngle) / 30;
 
@@ -368,8 +448,101 @@ public class RobotHardware {
         }
         brake();
     }
-}
 
+    //ee at constant power
+    public void drivePower(int inches, double power, boolean shoot, int angle, int shooterPower) {
+        resetEncoders();
+        double neededTicks = inches * constants.ticksPerTok;
+        double currentTicks = -fr.getCurrentPosition();
+        while (Math.abs(currentTicks - neededTicks) > 50 && op.opModeIsActive()) {
+            currentTicks = -fr.getCurrentPosition();
+
+            double currentAngle = getAngle();
+
+            //sets correction for motor power based off of imu
+            double correction = (currentAngle - (double) angle) / 30;
+
+            //sets motor power
+            fr.setPower(power - correction);
+            fl.setPower(power + correction);
+            br.setPower(power - correction);
+            bl.setPower(power + correction);
+
+            //shoots if shooter is at speed
+            if (shoot) {
+                if (Math.abs(shooter.getVelocity() - shooterPower) < 75) {
+                    cleanser.setPower(0.33);
+                    intake.setPower(0.5);
+                } else {
+                    cleanser.setPower(0);
+                    intake.setPower(0);
+                }
+            }
+
+            telemetry.addData("needed", neededTicks);
+            telemetry.addData("current", currentTicks);
+            telemetry.addData("angle", (double) angle);
+            telemetry.update();
+        }
+        brake();
+    }
+
+    //shoot for given time
+    public void shoot(double ms, double shooterPower) {
+        ElapsedTime time = new ElapsedTime();
+        time.reset();
+        shooter.setVelocity(shooterPower);
+        double intakePower = intake.getPower();
+        while (time.milliseconds() < ms && op.opModeIsActive()) {
+            //  won't fire rings unless shooter is at correct velocity
+            if (Math.abs(shooter.getVelocity() - shooterPower) < 50) {
+                cleanser.setPower(0.33);
+                intake.setPower(0.5);
+            }
+            else {
+                cleanser.setPower(0);
+                intake.setPower(intakePower);
+            }
+        }
+        intake.setPower(intakePower);
+        cleanser.setPower(0);
+    }
+    public void shoot(double ms) {
+        shoot(ms, constants.shooterPower);
+    }
+
+    //shoots 3 rings quickly
+    public void shootRings(double power) {
+        blocker.setPosition(constants.blockerDown);
+        shooter.setVelocity(power);
+        while (Math.abs(shooter.getVelocity() - power) <= 10 && op.opModeIsActive()) {
+            op.idle();
+        }
+        ElapsedTime elapsedTime = new ElapsedTime();
+        elapsedTime.reset();
+        blocker.setPosition(constants.blockerUp);
+        while (elapsedTime.milliseconds() <= 5000) {
+            intake.setPower(1);
+            cleanser.setPower(1);
+        }
+        intake.setPower(0);
+        cleanser.setPower(0);
+        blocker.setPosition(constants.blockerUp);
+    }
+    public void shootRings() {
+        shootRings(constants.shooterPower);
+    }
+
+    public void placeWobble () {
+        wobbleArm.setPosition(constants.armDown);
+        sleep(350);
+        wobbleClamp.setPosition(constants.clampOpen);
+        sleep(250);
+        wobbleArm.setPosition(constants.armUp);
+        wobbleClamp.setPosition(constants.clampClosed);
+    }
+
+}
 
 
 

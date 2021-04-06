@@ -11,14 +11,15 @@ public class TeleOpControls {
     Telemetry telemetry;
     Constants constants = new Constants();
     int shooterSpeed = constants.shooterPower;
-    boolean aPressed = false;
-    boolean aDown = false;
-    boolean rbPressed = false;
+    boolean dPDPressed = false;
+    boolean dPDDown = false;
+    boolean rbPressed = true;
     boolean rbDown = false;
     boolean lbPressed = true;
     boolean lbDown = false;
     boolean bPressed = false;
     boolean bDown = false;
+    boolean gateOpen = false;
 
 
     public TeleOpControls(LinearOpMode op, RobotHardware robotHardware, Telemetry telemetry) {
@@ -27,39 +28,31 @@ public class TeleOpControls {
         this.telemetry = telemetry;
     }
 
-    public void allControlsJustToSpiteGiebe () {
-        //movement
-        //  left stick: strafing/movement
-        //  triggers: rotation
-        //  A toggle slow mode: 50% speed
-        double forward = -op.gamepad1.left_stick_y;
-        double strafe = op.gamepad1.left_stick_x;
-        double rotate = op.gamepad1.right_trigger - op.gamepad1.left_trigger;
+    public void notDriving () {
 
-        robotHardware.fr.setPower((aPressed ? 0.375 : 0.75) * (forward - rotate - strafe));
-        robotHardware.fl.setPower((aPressed ? 0.375 : 0.75) * (forward + rotate + strafe));
-        robotHardware.br.setPower((aPressed ? 0.375 : 0.75) * (forward - rotate + strafe));
-        robotHardware.bl.setPower((aPressed ? 0.375 : 0.75) * (forward + rotate - strafe));
 
         //intake/cleanser
         //  right stick
-        robotHardware.intake.setPower(op.gamepad1.a ? -0.5 : op.gamepad1.right_stick_y);
-        robotHardware.cleanser.setPower( op.gamepad1.a ? -1 :
-                (aPressed && Math.abs(constants.shooterPower - robotHardware.shooter.getVelocity()) < 75) || !aPressed ?
-                op.gamepad1.right_stick_y * 0.5 : 0);
+        //  only fires shots when the shooter is up to a range of speeds
+        //  back-take cleanser/intake when shooter starts to prevent jamming
+        robotHardware.intake.setPower(op.gamepad1.a ? 1 : op.gamepad1.right_stick_y);
+        robotHardware.cleanser.setPower(op.gamepad1.a ? 0.75 : op.gamepad1.right_stick_y * 0.75);
 
         //shooter
         //  A toggle on/off
-        if (op.gamepad1.a && !aDown) {
-            aDown = true;
-            aPressed = !aPressed;
+        //  on/off shooter
+        if (op.gamepad1.dpad_down && !dPDDown) {
+            dPDDown = true;
+            dPDPressed = !dPDPressed;
         }
-        else if (!op.gamepad1.a && aDown) {
-            aDown = false;
+        else if (!op.gamepad1.dpad_down && dPDDown) {
+            dPDDown = false;
         }
-        robotHardware.shooter.setVelocity((aPressed && !op.gamepad1.a) ? shooterSpeed : 0);
+        robotHardware.shooter.setVelocity(shooterSpeed);
 
         //wobble goal
+        //  LB toggle down/up
+        //  RB toggle clamp/release
         if (op.gamepad1.right_bumper && !rbDown) {
             rbDown = true;
             rbPressed = !rbPressed;
@@ -67,11 +60,12 @@ public class TeleOpControls {
         else if (!op.gamepad1.right_bumper && rbDown) {
             rbDown = false;
         }
-        robotHardware.wobbleClamp.setPosition(rbPressed ? constants.clampDown : constants.clampUp);
+        robotHardware.wobbleClamp.setPosition(rbPressed ? constants.clampClosed : constants.clampOpen);
 
         if (op.gamepad1.left_bumper && !lbDown) {
             lbDown = true;
             lbPressed = !lbPressed;
+            rbPressed = lbPressed;
         }
         else if (!op.gamepad1.left_bumper && lbDown) {
             lbDown = false;
@@ -79,6 +73,7 @@ public class TeleOpControls {
         robotHardware.wobbleArm.setPosition(lbPressed ? constants.armUp : constants.armDown);
 
         //power shots mode
+        //  lowers power
         if (op.gamepad1.b && !bDown) {
             bDown = true;
             bPressed = !bPressed;
@@ -87,11 +82,49 @@ public class TeleOpControls {
             bDown = false;
         }
 
-        shooterSpeed = bPressed ? constants.shooterPower - 100 : constants.shooterPower;
+        shooterSpeed = bPressed ? constants.shooterPower - 200: constants.shooterPower;
+
+        if (!gateOpen && Math.abs(robotHardware.shooter.getVelocity() - constants.shooterPower) <= 10 && op.gamepad1.a)
+            gateOpen = true;
+        else if (gateOpen && !op.gamepad1.a)
+            gateOpen = false;
+        robotHardware.blocker.setPosition(gateOpen ? constants.blockerUp : constants.blockerDown);
 
     }
-//    public boolean getBPressed() {
-//        return bPressed;
-//    }
+
+    public void normalDrive() {
+        //movement
+        //  left stick: strafing/movement
+        //  triggers: rotation
+        //  Hold left stick slow mode: 30% speed
+        double forward = -op.gamepad1.left_stick_y;
+        double strafe = op.gamepad1.left_stick_x;
+        double rotate = op.gamepad1.right_trigger - op.gamepad1.left_trigger;
+        double multiplier = (op.gamepad1.left_stick_button ? 0.3 : 1);
+
+        robotHardware.fr.setPower(multiplier * (forward - rotate - strafe));
+        robotHardware.fl.setPower(multiplier * (forward + rotate + strafe));
+        robotHardware.br.setPower(multiplier * (forward - rotate + strafe));
+        robotHardware.bl.setPower(multiplier * (forward + rotate - strafe));
+    }
+
+    public void weirdDrive() {
+        //movement
+        //  left stick: strafing/movement
+        //  right stick x: rotation
+        double forward = -op.gamepad1.left_stick_y;
+        double strafe = op.gamepad1.left_stick_x;
+        double rotate = op.gamepad1.right_stick_x;
+        double multiplier = 1;
+
+        robotHardware.fr.setPower(multiplier * (forward - rotate - strafe));
+        robotHardware.fl.setPower(multiplier * (forward + rotate + strafe));
+        robotHardware.br.setPower(multiplier * (forward - rotate + strafe));
+        robotHardware.bl.setPower(multiplier * (forward + rotate - strafe));
+    }
+
+    public boolean getB() {
+        return bPressed;
+    }
 
 }

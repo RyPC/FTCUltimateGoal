@@ -31,7 +31,7 @@ public class WithHive extends LinearOpMode {
         robotHardware.sleep(500);
         //shoot power shots
         //1
-        robotHardware.turnTo(20);
+        robotHardware.turnTo(20, 1);
         robotHardware.sleep(1500);
         robotHardware.cleanser.setPower(0.25);
         robotHardware.intake.setPower(0.4);
@@ -42,7 +42,7 @@ public class WithHive extends LinearOpMode {
         robotHardware.sleep(500);
         //2
         robotHardware.shooter.setVelocity(1450);
-        robotHardware.turnTo(19);
+        robotHardware.turnTo(19, 1);
         robotHardware.cleanser.setPower(0.25);
         robotHardware.intake.setPower(0.4);
         robotHardware.sleep(700);
@@ -50,7 +50,7 @@ public class WithHive extends LinearOpMode {
         robotHardware.intake.setPower(0);
         robotHardware.sleep(500);
         //3
-        robotHardware.turnTo(15);
+        robotHardware.turnTo(15, 1);
         robotHardware.cleanser.setPower(0.25);
         robotHardware.intake.setPower(0.4);
         robotHardware.sleep(1200);

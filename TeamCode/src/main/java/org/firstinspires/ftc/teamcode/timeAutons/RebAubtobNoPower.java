@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.actualAutons;
+package org.firstinspires.ftc.teamcode.timeAutons;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -28,7 +28,7 @@ public class RebAubtobNoPower extends LinearOpMode {
         robotHardware.drive(0.25, 1750);
         robotHardware.strafe(-0.25, 1750);
         robotHardware.sleep(500);
-        robotHardware.turnTo(5);
+        robotHardware.turnTo(5, 1);
         robotHardware.sleep(500);
         for (int i = 0; i < 4; i++) {
             robotHardware.cleanser.setPower(0.25);
@@ -44,7 +44,7 @@ public class RebAubtobNoPower extends LinearOpMode {
         robotHardware.shooter.setVelocity(constants.shooterPower - 50);
         robotHardware.cleanser.setPower(0.25);
         robotHardware.intake.setPower(0.4);
-        robotHardware.turnTo(5);
+        robotHardware.turnTo(5, 1);
         robotHardware.intake.setPower(-0.2);
         robotHardware.drive(0.15, 500);
         robotHardware.strafe(0.15, 200);

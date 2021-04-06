@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.betterAutons;
 
 
 import android.os.DropBoxManager;
-
+//import org.openftc.easyopencv.OpenCvInternalCamera;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -11,10 +11,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
-@Autonomous(name = "Reb", group = "Auton")
+@Autonomous(name = "Right Good", group = "Auton")
+//@Disabled
 public class NewRed extends LinearOpMode {
 
-
+//    OpenCvInternalCamera camera;
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
 
@@ -23,26 +24,50 @@ public class NewRed extends LinearOpMode {
     public void runOpMode() {
 
         robotHardware.init(hardwareMap, true);
+        robotHardware.wobbleClamp.setPosition(constants.clampClosed);
 
         waitForStart();
 
-        robotHardware.shooter.setVelocity(constants.shooterPower + 100);
-        robotHardware.driveTo(20);
-        robotHardware.turnTo(-90);
-        robotHardware.driveTo(12);
-        robotHardware.turnTo(0);
-        robotHardware.intake.setPower(0.4);
-        ElapsedTime waitTime = new ElapsedTime();
-        waitTime.reset();
-        while (waitTime.milliseconds() < 5000 && this.opModeIsActive()) {
-            if (Math.abs(robotHardware.shooter.getVelocity() - constants.shooterPower + 100) > 50) {
-                robotHardware.cleanser.setPower(0);
-            }
-            else {
-                robotHardware.cleanser.setPower(1);
-            }
+        //start shooter and drive in front of rings
+        robotHardware.shooter.setVelocity(constants.shooterPower + 50);
+        robotHardware.driveTo(20, false, 0);
+        robotHardware.sleep(250);
+        robotHardware.strafeTo(-12);
+        //shoot initial 3 rings
+        robotHardware.sleep(500);
+        robotHardware.turnTo(-6, 2);
+        robotHardware.shoot(750, constants.shooterPower + 50);
+        robotHardware.shoot(3250, constants.shooterPower);
+        //knock over middle rings
+        robotHardware.intake.setPower(-0.25);
+        robotHardware.driveTo(6, false,-5);
+        robotHardware.sleep(750);
+        robotHardware.intake.setPower(0.5);
+        //intake middle rings while shooting
+        robotHardware.sleep(1000);
+        for (int i = 0; i < 5; i++) {
+            robotHardware.drivePower(5, 0.1, true, -4, constants.shooterPower - 60);
+            robotHardware.intake.setPower(-0.15);
+            robotHardware.drivePower(3, 0.1, false, -4, 0);
+            robotHardware.intake.setPower(0.75);
         }
-        robotHardware.drive(0.15, 10000);
+        robotHardware.shoot(3000, constants.shooterPower);
+        robotHardware.driveTo(12, false,0);
+        robotHardware.shooter.setVelocity(0);
+        robotHardware.cleanser.setPower(0);
+        robotHardware.intake.setPower(0);
+        //place wobble
+        robotHardware.turnTo(90, 0.35);
+        robotHardware.strafeTo(8);
+        robotHardware.wobbleArm.setPosition(constants.armDown);
+        robotHardware.sleep(500);
+        robotHardware.wobbleClamp.setPosition(constants.clampOpen);
+        robotHardware.sleep(500);
+        robotHardware.wobbleArm.setPosition(constants.armUp);
+        robotHardware.sleep(500);
+        robotHardware.strafeTo(-8);
+        robotHardware.turnTo(0, 0.5);
 
+        //wobble goal
     }
 }

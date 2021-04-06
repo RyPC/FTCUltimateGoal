@@ -25,7 +25,7 @@ public class HiveBlue extends LinearOpMode {
         robotHardware.strafe(0.25, 500);
         robotHardware.drive(0.5, 1700);
         robotHardware.sleep(1000);
-        robotHardware.turnTo(18);
+        robotHardware.turnTo(180, 1);
         robotHardware.shooter.setVelocity(constants.shooterPower);
         robotHardware.sleep(2000);
         robotHardware.cleanser.setPower(0.2);
@@ -34,19 +34,19 @@ public class HiveBlue extends LinearOpMode {
         robotHardware.shooter.setVelocity(0);
         robotHardware.cleanser.setPower(0);
         robotHardware.intake.setPower(0);
-        robotHardware.turnTo(0);
+        robotHardware.turnTo(0, 1);
         robotHardware.drive(0.25,500);
         robotHardware.strafe(-0.25, 500);
-        robotHardware.turnTo(-90);
+        robotHardware.turnTo(-90, 1);
         robotHardware.strafe(-0.5, 1500);
         robotHardware.wobbleArm.setPosition(constants.armDown);
         robotHardware.sleep(500);
-        robotHardware.wobbleClamp.setPosition(constants.clampDown);
+        robotHardware.wobbleClamp.setPosition(constants.clampClosed);
         robotHardware.strafe(0.5, 125);
         robotHardware.sleep(500);
         robotHardware.wobbleArm.setPosition(constants.armUp);
         robotHardware.sleep(1000);
-        robotHardware.turnTo(0);
+        robotHardware.turnTo(0, 1);
         robotHardware.strafe(0.5, 800);
         robotHardware.drive(0.5, 500);
 

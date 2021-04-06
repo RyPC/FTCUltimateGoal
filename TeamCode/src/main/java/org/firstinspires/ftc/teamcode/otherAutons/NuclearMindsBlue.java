@@ -8,9 +8,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
-@Autonomous(name="TestAuton", group="Auton")
-@Disabled
-public class TestAuton extends LinearOpMode {
+//blue inner
+//three high goal
+@Autonomous(name="Blue inner/high goal", group="Auton")
+//@Disabled
+public class NuclearMindsBlue extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
@@ -23,11 +25,16 @@ public class TestAuton extends LinearOpMode {
         waitForStart();
 
         robotHardware.shooter.setVelocity(constants.shooterPower);
-        robotHardware.sleep(1000);
-        robotHardware.turnTo(2,  1.5);
-        robotHardware.turnTo(-2,  1.5);
-        robotHardware.turnTo(0,  1.5);
-        robotHardware.shootRings();
+        robotHardware.sleep(500);
+        robotHardware.strafeTo(12);
+        robotHardware.sleep(500);
+        robotHardware.driveTo(57, false, 0);
+        robotHardware.sleep(500);
+        robotHardware.turnTo(10, 1);
+        robotHardware.shoot(10000, constants.shooterPower);
+        robotHardware.turnTo(0, 1);
+        robotHardware.driveTo(8, false, 0);
+        robotHardware.strafeTo(8);
 
 
     }

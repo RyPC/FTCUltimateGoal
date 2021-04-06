@@ -1,13 +1,10 @@
-package org.firstinspires.ftc.teamcode.actualAutons;
+package org.firstinspires.ftc.teamcode.timeAutons;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
@@ -34,7 +31,7 @@ public class BlueAuton extends LinearOpMode {
         robotHardware.sleep(500);
         //shoot power shots
         //1
-        robotHardware.turnTo(20);
+        robotHardware.turnTo(20, 1);
         robotHardware.sleep(1500);
         robotHardware.cleanser.setPower(0.25);
         robotHardware.intake.setPower(0.4);
@@ -45,7 +42,7 @@ public class BlueAuton extends LinearOpMode {
         robotHardware.sleep(500);
         //2
         robotHardware.shooter.setVelocity(1450);
-        robotHardware.turnTo(19);
+        robotHardware.turnTo(19, 1);
         robotHardware.cleanser.setPower(0.25);
         robotHardware.intake.setPower(0.4);
         robotHardware.sleep(700);
@@ -53,7 +50,7 @@ public class BlueAuton extends LinearOpMode {
         robotHardware.intake.setPower(0);
         robotHardware.sleep(500);
         //3
-        robotHardware.turnTo(15);
+        robotHardware.turnTo(15, 1);
         robotHardware.cleanser.setPower(0.25);
         robotHardware.intake.setPower(0.4);
         robotHardware.sleep(1200);
@@ -79,13 +76,13 @@ public class BlueAuton extends LinearOpMode {
         robotHardware.cleanser.setPower(0);
         robotHardware.drive(0.5, 750);
         robotHardware.strafe(-0.5, 250);
-        robotHardware.turnTo(-90);
+        robotHardware.turnTo(-90, 1);
         robotHardware.wobbleArm.setPosition(constants.armDown);
         robotHardware.sleep(500);
-        robotHardware.wobbleClamp.setPosition(constants.clampDown);
+        robotHardware.wobbleClamp.setPosition(constants.clampClosed);
         robotHardware.sleep(500);
         robotHardware.strafe(-1, 250);
-        robotHardware.turnTo(0);
+        robotHardware.turnTo(0, 1);
 
     }
 }
