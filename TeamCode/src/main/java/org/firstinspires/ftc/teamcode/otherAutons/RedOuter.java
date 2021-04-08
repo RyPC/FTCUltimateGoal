@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.betterAutons;
+package org.firstinspires.ftc.teamcode.otherAutons;
 
 
 import android.os.DropBoxManager;
@@ -11,11 +11,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
-@Autonomous(name = "Right Good", group = "Auton")
-//@Disabled
-public class NewRed extends LinearOpMode {
+@Autonomous(name = "Red Out", group = "Auton")
+@Disabled
+public class RedOuter extends LinearOpMode {
 
-//    OpenCvInternalCamera camera;
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
 
@@ -68,6 +67,5 @@ public class NewRed extends LinearOpMode {
         robotHardware.strafeTo(-8);
         robotHardware.turnTo(0, 0.5);
 
-        //wobble goal
     }
 }

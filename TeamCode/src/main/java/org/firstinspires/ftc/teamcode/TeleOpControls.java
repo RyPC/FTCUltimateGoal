@@ -48,7 +48,7 @@ public class TeleOpControls {
         else if (!op.gamepad1.dpad_down && dPDDown) {
             dPDDown = false;
         }
-        robotHardware.shooter.setVelocity(shooterSpeed);
+        robotHardware.shooter.setVelocity(dPDPressed ? 0 : shooterSpeed);
 
         //wobble goal
         //  LB toggle down/up

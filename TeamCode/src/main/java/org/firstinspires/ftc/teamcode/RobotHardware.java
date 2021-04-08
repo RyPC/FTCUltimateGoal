@@ -288,7 +288,9 @@ public class RobotHardware {
         sleep(250);
     }
     public void turnTo(int angle) {
-        turnTo(angle, 1);
+        double currentAngle = getAngle();
+        double power = Math.abs(currentAngle - angle) > 170 ? 0.25 : Math.abs(currentAngle - angle) > 10 ? 1 : 2;
+        turnTo(angle, power);
     }
     //move based on encoders and imu correction
     public void moveTo(int x, int y) {
@@ -521,7 +523,7 @@ public class RobotHardware {
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.reset();
         blocker.setPosition(constants.blockerUp);
-        while (elapsedTime.milliseconds() <= 5000) {
+        while (elapsedTime.milliseconds() <= 5000 && op.opModeIsActive()) {
             intake.setPower(1);
             cleanser.setPower(1);
         }

@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 public class Constants {
 
-    public final int shooterPower = 1310;
+    public final int shooterPower = 1340;
     public final double clampClosed = 0.65;
     public final double clampOpen = 0;
     public final double armDown = 0.9;
