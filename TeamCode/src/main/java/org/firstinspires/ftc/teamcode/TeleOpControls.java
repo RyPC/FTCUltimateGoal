@@ -84,7 +84,7 @@ public class TeleOpControls {
 
         shooterSpeed = bPressed ? constants.shooterPower - 200: constants.shooterPower;
 
-        if (!gateOpen && Math.abs(robotHardware.shooter.getVelocity() - constants.shooterPower) <= 10 && op.gamepad1.a)
+        if (!gateOpen && Math.abs(robotHardware.shooter.getVelocity() - shooterSpeed) <= 10 && op.gamepad1.a)
             gateOpen = true;
         else if (gateOpen && !op.gamepad1.a)
             gateOpen = false;

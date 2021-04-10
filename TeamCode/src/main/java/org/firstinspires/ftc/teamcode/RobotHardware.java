@@ -237,6 +237,7 @@ public class RobotHardware {
         bl.setPower(0);
     }
     public void turn(double p, int ms) {
+        //clockwise - positive
         fr.setPower(-p);
         fl.setPower(p);
         br.setPower(-p);
@@ -289,9 +290,50 @@ public class RobotHardware {
     }
     public void turnTo(int angle) {
         double currentAngle = getAngle();
-        double power = Math.abs(currentAngle - angle) > 170 ? 0.25 : Math.abs(currentAngle - angle) > 10 ? 1 : 2;
+        double power = Math.abs(currentAngle - angle) > 170 ? 0.35 : Math.abs(currentAngle - angle) > 10 ? 1 : 2;
         turnTo(angle, power);
     }
+
+    //turn using a PID Controller
+    public void turnPID(int angle) {
+        //PID Controller: Proportional Integral Derivative Controller
+        //P: Power | R: integral of the error from t=0 to t=t | E: Error | Ep = Previous Error | t = time from last check
+        //P = (kp * E) + (ki * R) + (kd * (E - Ep) / t)
+
+        //k constants for proportional, integral, and derivative parts
+        double kp = 0.01;
+        int ki = 0;
+        int kd = 0;
+        //time from start to find the change in time
+        ElapsedTime t = new ElapsedTime();
+        double currentAngle = getAngle();
+        //declare other variables
+        double P = 0;
+        int R = 0;
+        double E;
+        double Ep = currentAngle - angle;
+
+        t.reset();
+        while ((Math.abs(angle - currentAngle) > 1 || Math.abs(P) < 0.2) && op.opModeIsActive()) {
+            telemetry.addData("power", P);
+            telemetry.update();
+            E = currentAngle - angle;
+            R+= E * t.milliseconds() / 1000.0;
+
+            //set motor powers to turn
+            P = (kp * E) + (ki * R) + (kd * (E - Ep) / (t.milliseconds() / 1000.0));
+            fr.setPower(-P);
+            br.setPower(-P);
+            fl.setPower(P);
+            bl.setPower(P);
+
+            Ep = (double)E;
+            currentAngle = getAngle();
+            t.reset();
+        }
+        brake();
+    }
+
     //move based on encoders and imu correction
     public void moveTo(int x, int y) {
         resetEncoders();
@@ -375,8 +417,8 @@ public class RobotHardware {
 //    \/
 //    /\
 //   /  \
-            double power1 = 0.25 + ((1.0 / 1890) * currentTicks);
-            double power2 = -((1.0 / 1890) * currentTicks) + (0.25 + neededTicks / 1890.0);
+            double power1 = 0.25 + (currentTicks / 1890.0);
+            double power2 = -(currentTicks / 1890.0) + (0.25 + neededTicks / 1890.0);
             double power = Math.min(power1, power2);
             double currentAngle = getAngle();
 
@@ -418,30 +460,32 @@ public class RobotHardware {
         driveTo(inches, false, angle);
     }
     public void strafeTo(int inches) {
+        //right positive
         ElapsedTime time = new ElapsedTime();
         time.reset();
 
-        inches*= -1.33;
+        inches*= 1.33;
         resetEncoders();
         double neededTicks = inches * constants.ticksPerTok;
         double currentTicks = 0;
         double initialAngle = getAngle();
         while (Math.abs(currentTicks - neededTicks) > 50 && op.opModeIsActive() && time.milliseconds() < 5000) {
-            currentTicks = -fr.getCurrentPosition();
+            currentTicks = fr.getCurrentPosition();
 
-            double power1 = 0.25 + ((1.0 / 1890) * currentTicks);
-            double power2 = -((1.0 / 1890) * currentTicks) + (0.25 + neededTicks / 1890);
-            double power = Math.min(power1, power2);
+//            double power1 = 0.25 + ((1.0 / 1890) * currentTicks);
+//            double power2 = -((1.0 / 1890) * currentTicks) + (0.25 + neededTicks / 1890);
+//            double power = inches > 0 ? Math.min(power1, power2) : Math.max(power1, power2);
+            double power = inches < 0 ? -0.5 : 0.5;
             double currentAngle = getAngle();
 
-            power = power < 0.25 && currentTicks > neededTicks ? -0.25 : Math.max(power, 0.25);
+//            power = power > 0 ? Math.max(0.5, power) : Math.min(-0.5, power);
 
-            double correction = (currentAngle - initialAngle) / 30;
+            double correction = (currentAngle - initialAngle) / 20;
 
-            fr.setPower(power - correction);
-            fl.setPower(-power + correction);
-            br.setPower(-power - correction);
-            bl.setPower(power + correction);
+            fr.setPower(-power - correction);
+            fl.setPower(power + correction);
+            br.setPower(power - correction);
+            bl.setPower(-power + correction);
 
             telemetry.addData("needed", neededTicks);
             telemetry.addData("current", currentTicks);
@@ -523,9 +567,9 @@ public class RobotHardware {
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.reset();
         blocker.setPosition(constants.blockerUp);
-        while (elapsedTime.milliseconds() <= 5000 && op.opModeIsActive()) {
-            intake.setPower(1);
-            cleanser.setPower(1);
+        while (elapsedTime.milliseconds() <= 1000 && op.opModeIsActive()) {
+            intake.setPower(0.75);
+            cleanser.setPower(0.75);
         }
         intake.setPower(0);
         cleanser.setPower(0);
@@ -542,6 +586,17 @@ public class RobotHardware {
         sleep(250);
         wobbleArm.setPosition(constants.armUp);
         wobbleClamp.setPosition(constants.clampClosed);
+    }
+
+    public void intake(boolean on) {
+        intake.setPower(on ? 0.75 : 0);
+        cleanser.setPower(on ? 0.75 : 0);
+    }
+    public void intakeOn() {
+        intake(true);
+    }
+    public void intakeOff() {
+        intake(false);
     }
 
 }

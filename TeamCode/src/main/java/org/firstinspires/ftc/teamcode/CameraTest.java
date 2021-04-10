@@ -13,7 +13,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 @TeleOp(name = "camera test", group = "TeleOp")
-@Disabled
+//@Disabled
 public class CameraTest extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
@@ -33,7 +33,7 @@ public class CameraTest extends LinearOpMode {
         robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.UPRIGHT);
+                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_RIGHT);
             }
         });
 

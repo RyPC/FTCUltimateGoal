@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
 @Autonomous(name="TestAuton", group="Auton")
-//@Disabled
+@Disabled
 public class TestAuton extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
@@ -22,12 +22,12 @@ public class TestAuton extends LinearOpMode {
 
         waitForStart();
 
-        robotHardware.shooter.setVelocity(constants.shooterPower);
-        robotHardware.sleep(5000);
-        robotHardware.turnTo(2,  1.5);
-        robotHardware.turnTo(-2,  1.5);
-        robotHardware.turnTo(0,  1.5);
-        robotHardware.shootRings();
+        robotHardware.sleep(1000);
+        robotHardware.turnPID(90);
+        robotHardware.sleep(1000);
+        robotHardware.turnPID(-90);
+        robotHardware.sleep(1000);
+        robotHardware.turnPID(0);
 
 
     }

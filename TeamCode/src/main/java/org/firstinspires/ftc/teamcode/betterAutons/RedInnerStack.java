@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.betterAutons;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Constants;
@@ -10,19 +11,16 @@ import org.firstinspires.ftc.teamcode.Pipeline;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.firstinspires.ftc.teamcode.enums.Rings;
-import org.firstinspires.ftc.teamcode.enums.Stages;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-//Red Inner
-//High goal guess wobble
-@Autonomous(name="Red Inner", group="Auton")
-//@Disabled
-public class RedInner extends LinearOpMode {
-
+@Autonomous(name = "Red Inner + Stack", group = "Auton")
+public class RedInnerStack extends LinearOpMode {
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
+    RedInner redInner;
     Rings position;
+
 
     @Override
     public void runOpMode() {
@@ -91,6 +89,23 @@ public class RedInner extends LinearOpMode {
                 robotHardware.strafeTo(-24);
                 robotHardware.driveTo(-48);
                 break;
+        }
+
+
+        //go back for more rings
+        if (elapsedTime.seconds() < 13) {
+            robotHardware.shooter.setVelocity(constants.shooterPower);
+            robotHardware.strafeTo(24);
+            robotHardware.turnTo(180);
+            robotHardware.intakeOn();
+            robotHardware.drivePower(12, 0.25, false, 180, 0);
+            robotHardware.driveTo(-6, 180);
+            robotHardware.intakeOff();
+            robotHardware.turnTo(-3);
+            robotHardware.shoot(5000, constants.shooterPower);
+            robotHardware.shooter.setVelocity(0);
+            robotHardware.turnTo(0);
+            robotHardware.driveTo(12);
         }
 
     }

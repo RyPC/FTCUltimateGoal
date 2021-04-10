@@ -38,12 +38,12 @@ public class BlueInner extends LinearOpMode {
         robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.UPRIGHT);
+                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_RIGHT);
             }
         });
 
         //camera stuff
-        while (!isStarted() && !isStopRequested() && !opModeIsActive()) {
+        while (!isStarted() && !isStopRequested()) {
             position = pipeline.getPosition();
             telemetry.addData("Position", position);
             telemetry.addLine("four: [" + pipeline.getRed(Rings.FOUR) + ", " + pipeline.getGreen(Rings.FOUR) + ", " + pipeline.getBlue(Rings.FOUR) + "]");
@@ -51,25 +51,22 @@ public class BlueInner extends LinearOpMode {
             telemetry.update();
         }
         robotHardware.camera.stopStreaming();
+
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.reset();
 
         //start moving and stuff
-        robotHardware.turnTo(0, 1.5);
-
-        robotHardware.init(hardwareMap, true);
-
-        waitForStart();
+        robotHardware.turnTo(0, 0.5);
 
         //start
-        robotHardware.shooter.setVelocity(constants.shooterPower);
+        robotHardware.shooter.setVelocity(constants.shooterPower - 50);
         robotHardware.sleep(500);
         robotHardware.strafeTo(12);
         robotHardware.sleep(500);
         robotHardware.driveTo(57);
         robotHardware.sleep(500);
         robotHardware.turnTo(10, 1);
-        robotHardware.shootRings();
+        robotHardware.shoot(5000, constants.shooterPower - 50);
         robotHardware.shooter.setVelocity(0);
         robotHardware.turnTo(0, 1);
         robotHardware.driveTo(8);
@@ -77,28 +74,27 @@ public class BlueInner extends LinearOpMode {
         //wobble goal
         switch(position) {
             case ZERO:
-                robotHardware.strafeTo(-24);
+                robotHardware.driveTo(8);
+                robotHardware.strafeTo(-36);
                 robotHardware.turnTo(180);
                 robotHardware.placeWobble();
-                robotHardware.strafeTo(-24);
-                robotHardware.turnTo(0);
-                robotHardware.strafeTo(24);
+                robotHardware.strafeTo(-30);
                 break;
             case ONE:
-                robotHardware.driveTo(24);
+                robotHardware.driveTo(36);
+                robotHardware.strafeTo(-12);
                 robotHardware.turnTo(180);
                 robotHardware.placeWobble();
-                robotHardware.strafeTo(24);
-                robotHardware.driveTo(-24);
+                robotHardware.strafeTo(-12);
+                robotHardware.driveTo(24, 180);
                 break;
             case FOUR:
-                robotHardware.driveTo(48);
-                robotHardware.strafeTo(-24);
+                robotHardware.driveTo(54);
+                robotHardware.strafeTo(-38);
                 robotHardware.turnTo(180);
                 robotHardware.placeWobble();
-                robotHardware.strafeTo(-24);
-                robotHardware.turnTo(0);
-                robotHardware.driveTo(-48);
+                robotHardware.strafeTo(-32);
+                robotHardware.driveTo(48);
                 break;
         }
 

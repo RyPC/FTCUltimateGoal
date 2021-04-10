@@ -19,10 +19,12 @@ public class Pipeline  extends OpenCvPipeline {
     public Pipeline(Color color) {
         //change values based on the side of the field
         if (color == Color.RED) {
-            //stuff idk
+            constants.heightOne = 195;
+            constants.heightFour = 165;
         }
         else {
-
+            constants.heightOne = 201;
+            constants.heightFour = 171;
         }
     }
 
@@ -30,12 +32,12 @@ public class Pipeline  extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
         //scan ring 1
-        RGB[0] = input.get(constants.heightOne / 2, constants.widthOne / 2);
-        Imgproc.circle(input, new Point(constants.widthOne / 2.0, constants.heightOne / 2.0), 10, new Scalar(0, 255, 0, 0));
+        RGB[0] = input.get(constants.heightOne, constants.widthOne);
+        Imgproc.circle(input, new Point(constants.widthOne, constants.heightOne), 10, new Scalar(0, 255, 0, 0));
 
         //scan ring 2
-        RGB[1] = input.get(constants.heightFour / 2, constants.widthFour / 2);
-        Imgproc.circle(input, new Point(constants.widthFour / 2.0, constants.heightFour / 2.0), 10, new Scalar(0, 0, 255, 0));
+        RGB[1] = input.get(constants.heightFour, constants.widthFour);
+        Imgproc.circle(input, new Point(constants.widthFour, constants.heightFour), 10, new Scalar(0, 0, 255, 0));
 
         //process ring values
         double sensitivity = 2.5;

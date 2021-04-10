@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
-@Autonomous(name = "Red Out", group = "Auton")
+@Autonomous(name = "Red Outter", group = "Auton")
 @Disabled
 public class RedOuter extends LinearOpMode {
 
