@@ -78,14 +78,14 @@ public class BlueInner extends LinearOpMode {
                 robotHardware.strafeTo(-36);
                 robotHardware.turnTo(180);
                 robotHardware.placeWobble();
-                robotHardware.strafeTo(-30);
+                robotHardware.strafeTo(-30, 180);
                 break;
             case ONE:
                 robotHardware.driveTo(36);
                 robotHardware.strafeTo(-12);
                 robotHardware.turnTo(180);
                 robotHardware.placeWobble();
-                robotHardware.strafeTo(-12);
+                robotHardware.strafeTo(-12, 180);
                 robotHardware.driveTo(24, 180);
                 break;
             case FOUR:
@@ -93,8 +93,8 @@ public class BlueInner extends LinearOpMode {
                 robotHardware.strafeTo(-38);
                 robotHardware.turnTo(180);
                 robotHardware.placeWobble();
-                robotHardware.strafeTo(-32);
-                robotHardware.driveTo(48);
+                robotHardware.strafeTo(-32, 180);
+                robotHardware.driveTo(48, 180);
                 break;
         }
 

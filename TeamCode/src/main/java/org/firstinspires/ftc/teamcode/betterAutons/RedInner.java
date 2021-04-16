@@ -65,7 +65,7 @@ public class RedInner extends LinearOpMode {
         robotHardware.driveTo(57);
         robotHardware.sleep(500);
         robotHardware.turnTo(-17, 1);
-        robotHardware.shoot(5000, constants.shooterPower - 50);
+        robotHardware.shoot(10000, constants.shooterPower - 50);
         robotHardware.shooter.setVelocity(0);
         robotHardware.turnTo(0, 1);
         robotHardware.driveTo(8);
@@ -73,9 +73,9 @@ public class RedInner extends LinearOpMode {
         //wobble goal
         switch(position) {
             case ZERO:
-                robotHardware.strafeTo(24);
+                robotHardware.strafeTo(28);
                 robotHardware.placeWobble();
-                robotHardware.strafeTo(-24);
+                robotHardware.strafeTo(-28);
                 break;
             case ONE:
                 robotHardware.driveTo(24);

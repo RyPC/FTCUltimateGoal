@@ -459,7 +459,7 @@ public class RobotHardware {
     public void driveTo(int inches, int angle) {
         driveTo(inches, false, angle);
     }
-    public void strafeTo(int inches) {
+    public void strafeTo(int inches, int angle) {
         //right positive
         ElapsedTime time = new ElapsedTime();
         time.reset();
@@ -468,7 +468,6 @@ public class RobotHardware {
         resetEncoders();
         double neededTicks = inches * constants.ticksPerTok;
         double currentTicks = 0;
-        double initialAngle = getAngle();
         while (Math.abs(currentTicks - neededTicks) > 50 && op.opModeIsActive() && time.milliseconds() < 5000) {
             currentTicks = fr.getCurrentPosition();
 
@@ -480,19 +479,22 @@ public class RobotHardware {
 
 //            power = power > 0 ? Math.max(0.5, power) : Math.min(-0.5, power);
 
-            double correction = (currentAngle - initialAngle) / 20;
+            double correction = (currentAngle - angle) / 20;
 
             fr.setPower(-power - correction);
             fl.setPower(power + correction);
             br.setPower(power - correction);
             bl.setPower(-power + correction);
 
-            telemetry.addData("needed", neededTicks);
-            telemetry.addData("current", currentTicks);
-            telemetry.addData("power", power);
-            telemetry.update();
+//            telemetry.addData("needed", neededTicks);
+//            telemetry.addData("current", currentTicks);
+//            telemetry.addData("power", power);
+//            telemetry.update();
         }
         brake();
+    }
+    public void strafeTo(int inches) {
+        strafeTo(inches, 0);
     }
 
     //ee at constant power

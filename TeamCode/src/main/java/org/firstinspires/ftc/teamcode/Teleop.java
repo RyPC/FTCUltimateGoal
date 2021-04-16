@@ -19,9 +19,14 @@ public class Teleop extends LinearOpMode {
     public void runOpMode() {
         robotHardware.init(hardwareMap, true);
 
-        waitForStart();
+        while (!opModeIsActive() && !isStopRequested()) {
+            idle();
+            sleep(50);
+        }
+        teleOpControls.useCamera();
         robotHardware.wobbleClamp.setPosition(constants.clampOpen);
         while (opModeIsActive() && !isStopRequested()) {
+            teleOpControls.autoAim();
             teleOpControls.notDriving();
             teleOpControls.normalDrive();
             telemetry.addData("imu", robotHardware.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);

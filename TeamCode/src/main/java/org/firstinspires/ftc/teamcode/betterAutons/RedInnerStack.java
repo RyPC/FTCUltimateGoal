@@ -46,6 +46,8 @@ public class RedInnerStack extends LinearOpMode {
             telemetry.addLine("four: [" + pipeline.getRed(Rings.FOUR) + ", " + pipeline.getGreen(Rings.FOUR) + ", " + pipeline.getBlue(Rings.FOUR) + "]");
             telemetry.addLine("one: [" + pipeline.getRed(Rings.ONE) + ", " + pipeline.getGreen(Rings.ONE) + ", " + pipeline.getBlue(Rings.ONE) + "]");
             telemetry.update();
+            idle();
+            sleep(50);
         }
         robotHardware.camera.stopStreaming();
 
@@ -93,7 +95,7 @@ public class RedInnerStack extends LinearOpMode {
 
 
         //go back for more rings
-        if (elapsedTime.seconds() < 13) {
+        if (elapsedTime.seconds() < 20 && position != Rings.ZERO) {
             robotHardware.shooter.setVelocity(constants.shooterPower);
             robotHardware.strafeTo(24);
             robotHardware.turnTo(180);

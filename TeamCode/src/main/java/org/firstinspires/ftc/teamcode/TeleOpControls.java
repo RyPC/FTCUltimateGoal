@@ -4,12 +4,17 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.robot.Robot;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.enums.Color;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 public class TeleOpControls {
+    BackboardPipeline pipeline;
     LinearOpMode op;
     RobotHardware robotHardware;
     Telemetry telemetry;
     Constants constants = new Constants();
+    Movement movement;
     int shooterSpeed = constants.shooterPower;
     boolean dPDPressed = false;
     boolean dPDDown = false;
@@ -26,6 +31,7 @@ public class TeleOpControls {
         this.op = op;
         this.robotHardware = robotHardware;
         this.telemetry = telemetry;
+        movement = new Movement(this.op, this.robotHardware, this.telemetry);
     }
 
     public void notDriving () {
@@ -121,6 +127,23 @@ public class TeleOpControls {
         robotHardware.fl.setPower(multiplier * (forward + rotate + strafe));
         robotHardware.br.setPower(multiplier * (forward - rotate + strafe));
         robotHardware.bl.setPower(multiplier * (forward + rotate - strafe));
+    }
+
+    public void useCamera() {
+        pipeline = new BackboardPipeline(Color.RED);
+        robotHardware.camera.setPipeline(pipeline);
+
+        robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_LEFT);
+            }
+        });
+    }
+    public void autoAim() {
+        if (op.gamepad1.y) {
+            movement.goToPoint(140, 140, pipeline);
+        }
     }
 
     public boolean getB() {
