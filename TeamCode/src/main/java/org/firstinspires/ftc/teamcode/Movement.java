@@ -44,7 +44,13 @@ public class Movement {
         if (pipeline.detected()) {
             strafe = (pipeline.getX() - x) / 100.0;
             drive = (pipeline.getY() - y) / 100.0;
+        }
+        if (straight)
             turnTo(0);
+    }
+    public void turnToX(int x, BackboardPipeline pipeline) {
+        if (pipeline.detected()) {
+            turn = (x - pipeline.getX()) / 350.0;
         }
     }
     public void goToPoint(int x, int y, BackboardPipeline pipeline) {
@@ -53,11 +59,16 @@ public class Movement {
 
     public void shoot(int power) {
         robotHardware.shooter.setVelocity(power);
-        robotHardware.blocker.setPosition(constants.blockerUp);
-        if (Math.abs(robotHardware.shooter.getVelocity() - power) < 200)
-            robotHardware.intakeOn();
-        else
-            robotHardware.intakeOff();
+
+        if (Math.abs(robotHardware.shooter.getVelocity() - power) < 200) {
+            robotHardware.blocker.setPosition(constants.blockerUp);
+            robotHardware.intake.setPower(0.5);
+            robotHardware.cleanser.setPower(0.5);
+        }
+        else {
+            robotHardware.intake.setPower(0);
+            robotHardware.cleanser.setPower(0);
+        }
     }
     public void shoot() {
         shoot(constants.shooterPower);
@@ -76,6 +87,10 @@ public class Movement {
     }
     public double speed() {
         return Math.abs(drive) + Math.abs(turn) + Math.abs(strafe);
+    }
+
+    public void block() {
+        robotHardware.blocker.setPosition(constants.blockerDown);
     }
 
 

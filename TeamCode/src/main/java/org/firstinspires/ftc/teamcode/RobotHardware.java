@@ -264,7 +264,7 @@ public class RobotHardware {
             //least of two power lines
 
             double power;
-            if (Math.abs(currentAngle - angle) < 90) {
+            if (Math.abs(currentAngle - angle) < 170) {
                 power = ((angle == 180 && currentAngle < 0 ? 180 * 2 + currentAngle : currentAngle) - angle) / (30 / turnSpeed);
                 power = power > 0 && power < 0.25 ? 0.25 : power < 0 && power > -0.25 ? -0.25 : power;
             }
@@ -497,7 +497,7 @@ public class RobotHardware {
         strafeTo(inches, 0);
     }
 
-    //ee at constant power
+    //drive at constant power
     public void drivePower(int inches, double power, boolean shoot, int angle, int shooterPower) {
         resetEncoders();
         double neededTicks = inches * constants.ticksPerTok;
@@ -508,7 +508,7 @@ public class RobotHardware {
             double currentAngle = getAngle();
 
             //sets correction for motor power based off of imu
-            double correction = (currentAngle - (double) angle) / 30;
+            double correction = (currentAngle - (double) angle) / 25;
 
             //sets motor power
             fr.setPower(power - correction);
@@ -533,6 +533,12 @@ public class RobotHardware {
             telemetry.update();
         }
         brake();
+    }
+    public void drivePower(int inches, double power, int angle) {
+        drivePower(inches, power, false, angle, 0);
+    }
+    public void drivePower(int inches, double power) {
+        drivePower(inches, power, false, 0, 0);
     }
 
     //shoot for given time

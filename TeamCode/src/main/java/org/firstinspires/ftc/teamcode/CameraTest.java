@@ -27,13 +27,13 @@ public class CameraTest extends LinearOpMode {
         telemetry.addLine("Setting up camera...");
         telemetry.update();
 
-        Pipeline pipeline = new Pipeline(Color.BLUE);
+        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
         robotHardware.camera.setPipeline(pipeline);
 
         robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
 
@@ -41,9 +41,19 @@ public class CameraTest extends LinearOpMode {
         telemetry.update();
 
         while (!opModeIsActive() && !isStarted() && !isStopRequested()) {
-            telemetry.addData("Position", pipeline.getPosition());
-            telemetry.addLine("four: [" + pipeline.getRed(Rings.FOUR) + ", " + pipeline.getGreen(Rings.FOUR) + ", " + pipeline.getBlue(Rings.FOUR) + "]");
-            telemetry.addLine("one: [" + pipeline.getRed(Rings.ONE) + ", " + pipeline.getGreen(Rings.ONE) + ", " + pipeline.getBlue(Rings.ONE) + "]");
+            if (pipeline.detected()) {
+                telemetry.addLine("Pos: [" + pipeline.getX() + ", " + pipeline.getY() + "]");
+
+                int[] left = pipeline.getLeft();
+                telemetry.addLine("Left: [" + left[0] + ", " + left[1] + "]");
+                int[] right = pipeline.getRight();
+                telemetry.addLine("Right: [" + right[0] + ", " + right[1] + "]");
+                telemetry.addLine("Size: [" + pipeline.getWidth() + ", " + pipeline.getHeight() + "]");
+
+            }
+            else
+                telemetry.addLine("No backboard detected");
+
             telemetry.update();
         }
 

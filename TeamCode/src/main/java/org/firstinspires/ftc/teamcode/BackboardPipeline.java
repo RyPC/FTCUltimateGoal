@@ -19,6 +19,8 @@ public class BackboardPipeline extends OpenCvPipeline {
     Constants constants;
     int[] left = {0, 0};
     int[] right = {0, 0};
+    double[] rgbL;
+    double[] rgbR;
 
     Mat hsv = new Mat();
     Mat noWhite = new Mat();
@@ -40,8 +42,8 @@ public class BackboardPipeline extends OpenCvPipeline {
 
         int width = 240;
         int height = 320;
-        int rowCol1 = 10000000;
-        int rowCol2 = 10000000;
+        int rowCol1 = width + height;
+        int rowCol2 = width + height;
         int row1 = 0;
         int row2 = 0;
         int col1 = 0;
@@ -68,6 +70,9 @@ public class BackboardPipeline extends OpenCvPipeline {
             }
         }
 
+        rgbL = input.get(col1, row1);
+        rgbR = input.get(col2, row2);
+
         Imgproc.circle(input, new Point(row1, col1), 10, new Scalar(0, 255, 0, 0));
         Imgproc.circle(input, new Point(row2, col2), 10, new Scalar(0, 255, 0, 0));
 
@@ -82,7 +87,7 @@ public class BackboardPipeline extends OpenCvPipeline {
         return input;
     }
     public boolean checkRed(double[] rgb) {
-        return rgb[0] > rgb[1] + rgb[2] && rgb[1] + rgb[2] < 200;
+        return rgb[0] > (rgb[1] + rgb[2]) * 0.8 && rgb[1] + rgb[2] < 200 && rgb[0] > 130;
     }
 
     public int getX() {
@@ -102,6 +107,12 @@ public class BackboardPipeline extends OpenCvPipeline {
     }
     public int[] getRight() {
         return right;
+    }
+    public double[] getRGBRight() {
+        return rgbR;
+    }
+    public double[] getRGBLeft() {
+        return rgbL;
     }
 
     public boolean detected() {

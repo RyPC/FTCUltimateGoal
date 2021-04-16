@@ -14,7 +14,6 @@ public class TeleOpControls {
     RobotHardware robotHardware;
     Telemetry telemetry;
     Constants constants = new Constants();
-    Movement movement;
     int shooterSpeed = constants.shooterPower;
     boolean dPDPressed = false;
     boolean dPDDown = false;
@@ -31,7 +30,6 @@ public class TeleOpControls {
         this.op = op;
         this.robotHardware = robotHardware;
         this.telemetry = telemetry;
-        movement = new Movement(this.op, this.robotHardware, this.telemetry);
     }
 
     public void notDriving () {
@@ -139,11 +137,6 @@ public class TeleOpControls {
                 robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
-    }
-    public void autoAim() {
-        if (op.gamepad1.y) {
-            movement.goToPoint(140, 140, pipeline);
-        }
     }
 
     public boolean getB() {
