@@ -23,6 +23,8 @@ public class TeleOpControls {
     boolean lbDown = false;
     boolean bPressed = false;
     boolean bDown = false;
+    boolean eggDown = false;
+    boolean eggPressed = false;
     boolean gateOpen = false;
 
 
@@ -137,6 +139,31 @@ public class TeleOpControls {
                 robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
+    }
+
+    public void eggs2() {
+        if (op.gamepad2.a && !eggDown) {
+            eggDown = true;
+            eggPressed = !eggPressed;
+        }
+        else if (!op.gamepad2.a && eggDown)
+            eggDown = false;
+        if (eggPressed)
+            robotHardware.eggsDown();
+        else
+            robotHardware.eggsUp();
+    }
+    public void eggs1() {
+        if (op.gamepad1.x && !eggDown) {
+            eggDown = true;
+            eggPressed = !eggPressed;
+        }
+        else if (!op.gamepad1.x && eggDown)
+            eggDown = false;
+        if (eggPressed)
+            robotHardware.eggsDown();
+        else
+            robotHardware.eggsUp();
     }
 
     public boolean getB() {

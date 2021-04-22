@@ -22,6 +22,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotserver.internal.webserver.controlhubupdater.ChUpdaterCommManager;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -64,6 +65,8 @@ public class RobotHardware {
     public Servo wobbleClamp;
     public Servo wobbleArm;
     public Servo blocker;
+    public Servo leftEgg;
+    public Servo rightEgg;
 
     LinearOpMode op;
     Telemetry telemetry;
@@ -100,6 +103,9 @@ public class RobotHardware {
         wobbleClamp = hwMap.get(Servo.class, "wobbleClamp");
         //shooter blocker
         blocker = hwMap.get(Servo.class, "blocker");
+        //eggs
+        leftEgg = hwMap.get(Servo.class, "leftEgg");
+        rightEgg = hwMap.get(Servo.class, "rightEgg");
         //camera
         webcamName = hwMap.get(WebcamName.class, "Looky");
         cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
@@ -162,6 +168,8 @@ public class RobotHardware {
         wobbleArm.setPosition(constants.armUp);
         wobbleClamp.setPosition(constants.clampClosed);
         blocker.setPosition(constants.blockerUp);
+        rightEgg.setPosition(constants.rightEggUp);
+        leftEgg.setPosition(constants.leftEggUp);
     }
 
     //reset imu
@@ -264,14 +272,9 @@ public class RobotHardware {
             //least of two power lines
 
             double power;
-            if (Math.abs(currentAngle - angle) < 170) {
-                power = ((angle == 180 && currentAngle < 0 ? 180 * 2 + currentAngle : currentAngle) - angle) / (30 / turnSpeed);
-                power = power > 0 && power < 0.25 ? 0.25 : power < 0 && power > -0.25 ? -0.25 : power;
-            }
-            else {
-                power = 0.25;
-            }
-//            double power = 0.25;
+
+            power = (angle == 180) ? (currentAngle >= 0 ? currentAngle - 180 : 180 + currentAngle) : currentAngle - angle;
+            power/= (30 / turnSpeed);
 
             fr.setPower(-power);
             fl.setPower(power);
@@ -597,14 +600,23 @@ public class RobotHardware {
     }
 
     public void intake(boolean on) {
-        intake.setPower(on ? 0.75 : 0);
-        cleanser.setPower(on ? 0.75 : 0);
+        intake.setPower(on ? 1 : 0);
+        cleanser.setPower(on ? 1 : 0);
     }
     public void intakeOn() {
         intake(true);
     }
     public void intakeOff() {
         intake(false);
+    }
+
+    public void eggsDown() {
+        rightEgg.setPosition(constants.rightEggDown);
+        leftEgg.setPosition(constants.leftEggDown);
+    }
+    public void eggsUp() {
+        rightEgg.setPosition(constants.rightEggUp);
+        leftEgg.setPosition(constants.leftEggUp);
     }
 
 }

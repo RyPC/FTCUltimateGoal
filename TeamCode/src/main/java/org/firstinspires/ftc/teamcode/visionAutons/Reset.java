@@ -1,20 +1,22 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.visionAutons;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.BackboardPipeline;
+import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Movement;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.enums.Color;
-import org.firstinspires.ftc.teamcode.enums.Rings;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.Arrays;
 
-@Autonomous(name = "Pee hole", group = "Vision")
-public class PeePee extends LinearOpMode {
+@Autonomous(name = "Reset", group = "Vision")
+public class Reset extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
@@ -52,6 +54,7 @@ public class PeePee extends LinearOpMode {
                 telemetry.addLine("RGB");
                 telemetry.addData("Left", Arrays.toString(pipeline.getRGBLeft()));
                 telemetry.addData("Right", Arrays.toString(pipeline.getRGBRight()));
+                telemetry.addData("angle", pipeline.getAngle());
                 telemetry.update();
 
             }
@@ -63,45 +66,7 @@ public class PeePee extends LinearOpMode {
         robotHardware.blocker.setPosition(constants.blockerDown);
         while(opModeIsActive() && !isStopRequested()) {
             movement.resetPower();
-
-            robotHardware.shooter.setVelocity(constants.shooterPower);
-            if (elapsedTime.milliseconds() < 500)
-                robotHardware.drivePower(50, 0.75, false, 0, 0);
-            else if (elapsedTime.milliseconds() < 7000) {
-                if (robotHardware.blocker.getPosition() != constants.blockerUp)
-                    movement.goToPoint(135, 135, pipeline);
-                if (movement.closeTo(135, 135, 10, pipeline) && elapsedTime.milliseconds() > 5000)
-                    movement.shoot();
-            }
-            else if (elapsedTime.milliseconds() < 10000) {
-                robotHardware.blocker.setPosition(constants.blockerDown);
-                robotHardware.intakeOff();
-                robotHardware.driveTo(58);
-                robotHardware.placeWobble();
-                robotHardware.strafeTo(-4);
-                robotHardware.drivePower(-58, -0.85);
-            }
-            else if (elapsedTime.milliseconds() < 14500) {
-                movement.goToPoint(94, 178, pipeline);
-            }
-            else if (elapsedTime.milliseconds() < 15000) {
-                robotHardware.intakeOn();
-                robotHardware.turnTo(90, 0.5);
-                robotHardware.drivePower(10, 0.1, 90);
-                robotHardware.drivePower(-10, -0.5, 90);
-                robotHardware.intakeOff();
-                robotHardware.blocker.setPosition(constants.blockerDown);
-            }
-            else {
-                if (robotHardware.blocker.getPosition() != constants.blockerUp) {
-                    movement.goToPoint(135, 135, pipeline);
-                }
-                if (movement.closeTo(135, 135, 10, pipeline) && elapsedTime.milliseconds() > 5000)
-                    movement.shoot();
-                else
-                    movement.block();
-            }
-
+            movement.goToPoint(203,224, pipeline);
             movement.setPowers();
             telemetry.addData("Detected", pipeline.detected());
             int[] left = pipeline.getLeft();
@@ -113,6 +78,7 @@ public class PeePee extends LinearOpMode {
             telemetry.addLine("RGB");
             telemetry.addData("Right", Arrays.toString(pipeline.getRight()));
             telemetry.addData("Left", Arrays.toString(pipeline.getLeft()));
+            telemetry.addData("angle", pipeline.getAngle());
             telemetry.update();
         }
     }

@@ -41,6 +41,9 @@ public class Teleop extends LinearOpMode {
 
         telemetry.addLine("Ready for Start");
         while (!opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("right", robotHardware.rightEgg.getPosition());
+            telemetry.addData("left", robotHardware.leftEgg.getPosition());
+            telemetry.update();
             idle();
             sleep(50);
         }
@@ -55,6 +58,8 @@ public class Teleop extends LinearOpMode {
             else {
                 teleOpControls.notDriving();
                 teleOpControls.normalDrive();
+//                teleOpControls.eggs2();
+                teleOpControls.eggs1();
             }
             telemetry.addData("imu", robotHardware.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
             telemetry.addData("Mode", teleOpControls.getB() ? "low" : "high");

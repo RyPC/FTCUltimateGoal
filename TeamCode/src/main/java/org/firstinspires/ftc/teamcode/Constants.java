@@ -9,6 +9,10 @@ public class Constants {
     public final double armUp = 0.45;
     public final double blockerDown = 0.4;
     public final double blockerUp = 0.3;
+    public final double rightEggDown = 0;
+    public final double rightEggUp = 0.75;
+    public final double leftEggDown = 1;
+    public final double leftEggUp = 0;
     public final String vuforiaKey = "AR5tugH/////AAAAmZWCOAi6Vk4zplw3uCD3PmgKbNphk1fcCZOjab9YzLoNQfafXMjye9dox6cEGiBcmfnWt7eZ8ZOdNUKn10YmfgnbM9ntclwrxuEgimv7R3zusivZOQytR+bzWylYXXovLOi1dsgFu6Rm+rJ95sKy6yn/KkrD5nhhCShwxniD5t5FYkxGC7TY681Tx4jfCdnq4aU7tuzOiPnaG8uhaRElSGelPtIBjmBkSHKE8LxZuza3Aewwm2I/v5p5vPrCmDRJlzkWdCWnFZ4v/jmtZAnpR3lx+zA51ZAd9EGanlLSzKQa5C9BtOr9mfLFBKZNxmORyeWX7btz8prPOCeYQyhwtfn6QjVygV2IrCNh7iyL7838";
 
     //encoder stuff

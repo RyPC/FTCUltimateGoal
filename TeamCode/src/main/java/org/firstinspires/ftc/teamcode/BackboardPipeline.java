@@ -10,6 +10,8 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.util.Vector;
+
 /*
 Created by Ryan Su over the course of several random dates in 2021
  */
@@ -20,12 +22,11 @@ public class BackboardPipeline extends OpenCvPipeline {
     int[] left = {0, 0};
     int[] right = {0, 0};
     double[] rgbL;
+    double[] rgb;
     double[] rgbR;
 
     Mat hsv = new Mat();
-    Mat noWhite = new Mat();
     Mat redMat = new Mat();
-    Mat redThreshold = new Mat();
 
     public BackboardPipeline(Color color) {
         this.color = color;
@@ -34,11 +35,22 @@ public class BackboardPipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
 
-//        Imgproc.cvtColor(input, hsv, Imgproc.COLOR_RGB2HSV);
-//        Core.extractChannel(hsv, hsv, 0);
-//        Imgproc.threshold(hsv, noWhite, 0, 30, Imgproc.THRESH_TOZERO);
-//        Core.extractChannel(input, redMat, 0);
-//        Imgproc.threshold(redMat, redThreshold, 150, 255, Imgproc.THRESH_BINARY);
+        Imgproc.cvtColor(input, hsv, Imgproc.COLOR_RGB2HSV);
+        Core.inRange(hsv, new Scalar(0, 100, 100), new Scalar(15, 255, 255), redMat);
+        Mat lines = new Mat();
+        Imgproc.Canny(redMat, lines, 50, 200, 3, false);
+        Imgproc.HoughLines(lines, lines, 1, Math.PI/180, 50);
+        for (int x = 0; x < lines.rows(); x++) {
+            double rho = lines.get(x, 0)[0],
+                    theta = lines.get(x, 0)[1];
+            double a = Math.cos(theta), b = Math.sin(theta);
+            double x0 = a * rho, y0 = b * rho;
+            Point pt1 = new Point(Math.round(x0 + 1000 * (-b)), Math.round(y0 + 1000 * (a)));
+            Point pt2 = new Point(Math.round(x0 - 1000 * (-b)), Math.round(y0 - 1000 * (a)));
+            Imgproc.line(input, pt1, pt2, new Scalar(255, 255, 0), 3, Imgproc.LINE_AA, 0);
+        }
+
+
 
         int width = 240;
         int height = 320;
@@ -72,9 +84,12 @@ public class BackboardPipeline extends OpenCvPipeline {
 
         rgbL = input.get(col1, row1);
         rgbR = input.get(col2, row2);
+        rgb = input.get((col1 + col2) / 2, (row1 + row2) / 2);
 
-        Imgproc.circle(input, new Point(row1, col1), 10, new Scalar(0, 255, 0, 0));
-        Imgproc.circle(input, new Point(row2, col2), 10, new Scalar(0, 255, 0, 0));
+        if (detected()) {
+            Imgproc.circle(input, new Point(row1, col1), 10, new Scalar(0, 255, 0, 0));
+            Imgproc.circle(input, new Point(row2, col2), 10, new Scalar(0, 255, 0, 0));
+        }
 
         left[0] = (int)row1;
         left[1] = (int)col1;
@@ -111,11 +126,17 @@ public class BackboardPipeline extends OpenCvPipeline {
     public double[] getRGBRight() {
         return rgbR;
     }
+    public double[] getRGB() {
+        return rgb;
+    }
     public double[] getRGBLeft() {
         return rgbL;
     }
+    public double getAngle() {
+        return (double) getHeight() / getWidth() * 90 - 4;
+    }
 
     public boolean detected() {
-        return (right[0] + left[0] + right[1] + left[1] != 0);
+        return (right[0] + left[0] + right[1] + left[1] != 0) && checkRed(getRGB()) && getWidth() > 10;
     }
 }

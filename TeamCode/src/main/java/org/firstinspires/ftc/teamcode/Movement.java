@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Point;
 import android.text.method.BaseKeyListener;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.hardware.android.GpioPin;
 
 public class Movement {
 
@@ -15,6 +17,7 @@ public class Movement {
     Constants constants = new Constants();
 
     public double strafe = 0;
+    public int prevX, prevY;
     public double drive = 0;
     public double turn = 0;
 
@@ -36,22 +39,39 @@ public class Movement {
         drive = 0;
         turn = 0;
     }
-    public void turnTo(double angle) {
-        turn = (angle - robotHardware.getAngle()) / 40;
-    }
 
-    public void goToPoint(int x, int y, BackboardPipeline pipeline, boolean straight) {
-        if (pipeline.detected()) {
-            strafe = (pipeline.getX() - x) / 100.0;
-            drive = (pipeline.getY() - y) / 100.0;
-        }
-        if (straight)
-            turnTo(0);
+    public void turnTo(double angle, BackboardPipeline pipeline) {
+        turn = (pipeline.getAngle() - angle) / 60;
+    }
+    public void turnTo(double angle) {
+        double currentAngle = robotHardware.getAngle();
+        double power = (angle == 180) ? (currentAngle >= 0 ? currentAngle - 180 : 180 + currentAngle) : currentAngle - angle;
+
+        turn = power / 30;
     }
     public void turnToX(int x, BackboardPipeline pipeline) {
         if (pipeline.detected()) {
-            turn = (x - pipeline.getX()) / 350.0;
+            turn = (x - pipeline.getX()) / 300.0;
         }
+    }
+
+    public void goToPoint(int x, int y, int currentX, int currentY, BackboardPipeline pipeline, boolean straight) {
+        strafe = (pipeline.getX() - x) / 100.0;
+        drive = (pipeline.getY() - y) / 100.0;
+        if (straight)
+            turnTo(0);
+    }
+    public void goToPoint(int x, int y, BackboardPipeline pipeline, boolean straight) {
+        if (straight) {
+            turnTo(0);
+        }
+        if (pipeline.detected()) {
+            prevX = pipeline.getX();
+            prevY = pipeline.getY();
+            goToPoint(x, y, pipeline.getX(), pipeline.getY(), pipeline, straight);
+        }
+//        else
+//            goToPoint(x, y, prevX, prevY, pipeline, straight);
     }
     public void goToPoint(int x, int y, BackboardPipeline pipeline) {
         goToPoint(x, y, pipeline, true);
