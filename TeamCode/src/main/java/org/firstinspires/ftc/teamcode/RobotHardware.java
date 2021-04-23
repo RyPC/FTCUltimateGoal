@@ -275,6 +275,10 @@ public class RobotHardware {
 
             power = (angle == 180) ? (currentAngle >= 0 ? currentAngle - 180 : 180 + currentAngle) : currentAngle - angle;
             power/= (30 / turnSpeed);
+            if (power < 0.15 && power > 0)
+                power = 0.15;
+            else if (power > -0.25 && power < 0)
+                power = -0.15;
 
             fr.setPower(-power);
             fl.setPower(power);
@@ -293,7 +297,7 @@ public class RobotHardware {
     }
     public void turnTo(int angle) {
         double currentAngle = getAngle();
-        double power = Math.abs(currentAngle - angle) > 170 ? 0.35 : Math.abs(currentAngle - angle) > 10 ? 1 : 2;
+        double power = Math.abs(currentAngle - angle) > 135 ? 0.35 : Math.abs(currentAngle - angle) > 10 ? 1 : 2;
         turnTo(angle, power);
     }
 
@@ -498,6 +502,28 @@ public class RobotHardware {
     }
     public void strafeTo(int inches) {
         strafeTo(inches, 0);
+    }
+
+    //strafe at constant power
+    public void strafePower(int inches, double power) {
+        resetEncoders();
+        double neededTicks = inches * constants.ticksPerTok;
+        double currentTicks = -fr.getCurrentPosition();
+        while (Math.abs(currentTicks - neededTicks) > 50 && op.opModeIsActive()) {
+            currentTicks = fr.getCurrentPosition();
+
+            double currentAngle = getAngle();
+
+//            power = power > 0 ? Math.max(0.5, power) : Math.min(-0.5, power);
+
+//            double correction = (currentAngle - angle) / 20;
+
+            fr.setPower(-power);
+            fl.setPower(power);
+            br.setPower(power);
+            bl.setPower(-power);
+        }
+        brake();
     }
 
     //drive at constant power

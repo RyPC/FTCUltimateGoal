@@ -45,9 +45,10 @@ public class Movement {
     }
     public void turnTo(double angle) {
         double currentAngle = robotHardware.getAngle();
-        double power = (angle == 180) ? (currentAngle >= 0 ? currentAngle - 180 : 180 + currentAngle) : currentAngle - angle;
+        double power = (angle - currentAngle) / 40;
+//        double power = (angle == 180) ? (currentAngle >= 0 ? currentAngle - 180 : 180 + currentAngle) : currentAngle - angle;
 
-        turn = power / 30;
+        turn = power;
     }
     public void turnToX(int x, BackboardPipeline pipeline) {
         if (pipeline.detected()) {
@@ -58,8 +59,6 @@ public class Movement {
     public void goToPoint(int x, int y, int currentX, int currentY, BackboardPipeline pipeline, boolean straight) {
         strafe = (pipeline.getX() - x) / 100.0;
         drive = (pipeline.getY() - y) / 100.0;
-        if (straight)
-            turnTo(0);
     }
     public void goToPoint(int x, int y, BackboardPipeline pipeline, boolean straight) {
         if (straight) {

@@ -25,13 +25,13 @@ public class TestAuton extends LinearOpMode {
 
         waitForStart();
 
-        ElapsedTime elapsedTime = new ElapsedTime();
-        elapsedTime.reset();
-        while (opModeIsActive() && !isStopRequested()) {
-            movement.resetPower();
-            movement.turnTo(elapsedTime.seconds() / 2 % 2 == 0 ? 180 : 0);
-            movement.setPowers();
-        }
+//        ElapsedTime elapsedTime = new ElapsedTime();
+//        elapsedTime.reset();
+//        while (opModeIsActive() && !isStopRequested()) {
+//            movement.resetPower();
+            robotHardware.turnTo(180);
+//            movement.setPowers();
+//        }
 
     }
 }

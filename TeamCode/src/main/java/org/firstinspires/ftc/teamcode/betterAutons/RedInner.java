@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.betterAutons;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -17,7 +18,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 //Red Inner
 //High goal guess wobble
 @Autonomous(name="Red Inner", group="Auton")
-//@Disabled
+@Disabled
 public class RedInner extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);

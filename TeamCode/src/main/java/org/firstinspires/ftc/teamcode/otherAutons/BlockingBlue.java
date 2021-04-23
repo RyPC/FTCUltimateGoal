@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.otherAutons;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -8,6 +9,7 @@ import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
 @Autonomous(name="Blocking Blue", group="Auton")
+@Disabled
 public class BlockingBlue extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);

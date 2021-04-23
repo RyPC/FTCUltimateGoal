@@ -18,7 +18,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 //blue inner
 //three high goal
 @Autonomous(name="Blue inner", group="Auton")
-//@Disabled
+@Disabled
 public class BlueInner extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.betterAutons;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -15,6 +16,7 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Autonomous(name = "Red Inner + Stack", group = "Auton")
+@Disabled
 public class RedInnerStack extends LinearOpMode {
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
