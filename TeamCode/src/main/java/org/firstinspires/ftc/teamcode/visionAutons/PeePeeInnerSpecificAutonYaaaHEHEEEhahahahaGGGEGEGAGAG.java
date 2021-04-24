@@ -21,8 +21,8 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
     Movement movement = new Movement(this, robotHardware, telemetry);
-
     @Override
+
     public void runOpMode() throws InterruptedException {
 
         robotHardware.init(hardwareMap, true);
@@ -65,12 +65,13 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
         totalTime.reset();
 
         movement.block();
-        robotHardware.shooter.setVelocity(constants.shooterPower);
         int stage = 0;
         int prevStage = -1;
 
         while(opModeIsActive() && !isStopRequested()) {
             movement.resetPower();
+            robotHardware.shooter.setVelocity(constants.shooterPower);
+
             if (stage != prevStage) {
                 elapsedTime.reset();
                 prevStage = (int)stage;
@@ -79,75 +80,85 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
             switch (stage) {
                 case 0:
                     //wobble goal
-                    robotHardware.drivePower(116, 0.75, false, 0, 0);
+                    robotHardware.shooter.setVelocity(constants.shooterPower);
+                    robotHardware.drivePower(113, 0.75, false, 0, 0);
                     robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                    robotHardware.strafeTo(-4);
+                    robotHardware.strafePower(7, 1);
+                    robotHardware.strafePower(-11, -1);
+                    robotHardware.drivePower(-36, -0.9);
                     robotHardware.wobbleClamp.setPosition(constants.clampClosed);
-                    robotHardware.drivePower(-45, -0.9);
                     stage++;
                     break;
                 case 1:
                 case 4:
+                case 7:
                     //shoot
                     if (robotHardware.blocker.getPosition() != constants.blockerUp)
                         movement.goToPoint(135, 135, pipeline);
-                    if (movement.closeTo(135, 135, 10, pipeline))
+                    if (movement.closeTo(135, 135, 15, pipeline)) {
                         movement.shoot();
-                    if (elapsedTime.milliseconds() > 3500)
+                        robotHardware.intakeOn();
+                    }
+                    if (elapsedTime.milliseconds() > (stage == 1 ? 3000 : 3500))
                         stage++;
                     break;
                 case 2:
                     //line up for rings
                     movement.block();
                     movement.goToPoint(94, 178, pipeline);
-                    if (elapsedTime.milliseconds() > 2000)
+                    if (elapsedTime.milliseconds() > 1750)
                         stage++;
                     break;
                 case 3:
                     //collect stack
                     robotHardware.intakeOn();
                     robotHardware.turnTo(90);
-                    robotHardware.drivePower(11, 0.15, 90);
+                    robotHardware.drivePower(16, 0.15, 90);
                     robotHardware.intake.setPower(-1);
-                    robotHardware.drivePower(-3, -1, 90);
+                    robotHardware.drivePower(-4, -1, 90);
                     robotHardware.intakeOn();
                     movement.block();
                     stage++;
                     break;
                 case 5:
-                    //line up for stack rings
-                    robotHardware.intakeOff();
-                    movement.goToPoint(152, 213, pipeline);
-                    if (elapsedTime.milliseconds() > 1750)
+                    //line up for 2nd wobble
+                    movement.goToPoint(147, 208, pipeline, 1.5);
+                    if (elapsedTime.milliseconds() > 2500)
                         stage++;
                     break;
                 case 6:
-                    //pick up other wobble
+                    //pick up 2nd wobble
                     robotHardware.turnTo(180);
                     robotHardware.wobbleArm.setPosition(constants.armDown);
                     robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                    robotHardware.strafePower(14, 0.25);
+                    robotHardware.strafePower(14, 0.3333);
                     robotHardware.wobbleClamp.setPosition(constants.clampClosed);
                     robotHardware.sleep(333);
+                    robotHardware.strafePower(10,1);
+                    robotHardware.drivePower(10, 1, 0);
+                    movement.block();
+                    robotHardware.intakeOn();
                     stage++;
                     break;
-                case 7:
-                    //idek
-                    robotHardware.blocker.setPosition(constants.blockerDown);
-                    robotHardware.intakeOn();
-                    movement.goToPoint(135,135,pipeline);
-                    if(elapsedTime.milliseconds() > 2500)
-                        stage = 10;
+                case 8:
+                    //drive to and deposit wobble
+                    robotHardware.drivePower(48, 0.75);
+                    robotHardware.strafePower(6, 0.75);
+                    robotHardware.wobbleClamp.setPosition(constants.clampOpen);
+                    robotHardware.strafePower(-4, -0.75);
+                    robotHardware.drivePower(-37, -1);
+                    robotHardware.wobbleClamp.setPosition(constants.clampClosed);
+                    stage = 10;
+                    break;
                 case 10:
-                    //pp
+                    //pp-pp-pparkkk
+                    robotHardware.intakeOff();
                     movement.goToPoint(153, 90, pipeline);
                     break;
 
             }
 
-//            if (elapsedTime.milliseconds() > 8000)
-//                stage++;
-            if (totalTime.milliseconds() == 28)
+            if (totalTime.milliseconds() > 29000)
                 stage = 10;
             movement.setPowers();
             telemetry.addData("Stage", stage);

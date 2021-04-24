@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.app.LauncherActivity;
 import android.os.DropBoxManager;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -68,6 +69,9 @@ public class RobotHardware {
     public Servo leftEgg;
     public Servo rightEgg;
 
+    public double angleAdjustment = 0;
+    public int pastVelocity = 0;
+
     LinearOpMode op;
     Telemetry telemetry;
 
@@ -81,7 +85,7 @@ public class RobotHardware {
 
     //gets imu angle
     public double getAngle() {
-        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle + angleAdjustment;
     }
     //initialization
     public void init (HardwareMap hwMap, boolean initServos) {
@@ -191,11 +195,13 @@ public class RobotHardware {
         fl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         br.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     //wait for given milliseconds
@@ -514,14 +520,12 @@ public class RobotHardware {
 
             double currentAngle = getAngle();
 
-//            power = power > 0 ? Math.max(0.5, power) : Math.min(-0.5, power);
+            double correction = (Math.abs(currentAngle) > 160) ? ((180 - Math.abs(currentAngle)) * Math.abs(currentAngle) / currentAngle / 30) : 0;
 
-//            double correction = (currentAngle - angle) / 20;
-
-            fr.setPower(-power);
-            fl.setPower(power);
-            br.setPower(power);
-            bl.setPower(-power);
+            fr.setPower(-power + correction);
+            fl.setPower(power - correction);
+            br.setPower(power + correction);
+            bl.setPower(-power - correction);
         }
         brake();
     }
@@ -643,6 +647,21 @@ public class RobotHardware {
     public void eggsUp() {
         rightEgg.setPosition(constants.rightEggUp);
         leftEgg.setPosition(constants.leftEggUp);
+    }
+
+    //PID controller for shooter
+    public void setShooter(int velocity) {
+        int currentVelocity = (int) shooter.getVelocity();
+        int pastVelocity = this.pastVelocity;
+
+        double proportional = (velocity - currentVelocity) / 1000.0;
+        double derivative = (currentVelocity - pastVelocity) / 1000.0;
+        double integral = 0;
+        double power = proportional;
+        shooter.setPower(power);
+
+
+        this.pastVelocity = currentVelocity;
     }
 
 }

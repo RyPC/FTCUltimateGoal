@@ -35,20 +35,20 @@ public class BackboardPipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
 
-        Imgproc.cvtColor(input, hsv, Imgproc.COLOR_RGB2HSV);
-        Core.inRange(hsv, new Scalar(0, 100, 100), new Scalar(15, 255, 255), redMat);
-        Mat lines = new Mat();
-        Imgproc.Canny(redMat, lines, 50, 200, 3, false);
-        Imgproc.HoughLines(lines, lines, 1, Math.PI/180, 50);
-        for (int x = 0; x < lines.rows(); x++) {
-            double rho = lines.get(x, 0)[0],
-                    theta = lines.get(x, 0)[1];
-            double a = Math.cos(theta), b = Math.sin(theta);
-            double x0 = a * rho, y0 = b * rho;
-            Point pt1 = new Point(Math.round(x0 + 1000 * (-b)), Math.round(y0 + 1000 * (a)));
-            Point pt2 = new Point(Math.round(x0 - 1000 * (-b)), Math.round(y0 - 1000 * (a)));
-            Imgproc.line(input, pt1, pt2, new Scalar(255, 255, 0), 3, Imgproc.LINE_AA, 0);
-        }
+//        Imgproc.cvtColor(input, hsv, Imgproc.COLOR_RGB2HSV);
+//        Core.inRange(hsv, new Scalar(0, 100, 100), new Scalar(15, 255, 255), redMat);
+//        Mat lines = new Mat();
+//        Imgproc.Canny(redMat, lines, 50, 200, 3, false);
+//        Imgproc.HoughLines(lines, lines, 1, Math.PI/180, 50);
+//        for (int x = 0; x < lines.rows(); x++) {
+//            double rho = lines.get(x, 0)[0],
+//                    theta = lines.get(x, 0)[1];
+//            double a = Math.cos(theta), b = Math.sin(theta);
+//            double x0 = a * rho, y0 = b * rho;
+//            Point pt1 = new Point(Math.round(x0 + 1000 * (-b)), Math.round(y0 + 1000 * (a)));
+//            Point pt2 = new Point(Math.round(x0 - 1000 * (-b)), Math.round(y0 - 1000 * (a)));
+//            Imgproc.line(input, pt1, pt2, new Scalar(255, 255, 0), 3, Imgproc.LINE_AA, 0);
+//        }
 
 
 

@@ -20,6 +20,7 @@ public class Movement {
     public int prevX, prevY;
     public double drive = 0;
     public double turn = 0;
+    public double is, id;
 
     public Movement(LinearOpMode op, RobotHardware robotHardware, Telemetry telemetry) {
         this.op = op;
@@ -56,30 +57,42 @@ public class Movement {
         }
     }
 
-    public void goToPoint(int x, int y, int currentX, int currentY, BackboardPipeline pipeline, boolean straight) {
-        strafe = (pipeline.getX() - x) / 100.0;
-        drive = (pipeline.getY() - y) / 100.0;
+    public void goToPoint(int x, int y, int currentX, int currentY, BackboardPipeline pipeline, double power) {
+        //PI controller go to point
+        double diffs = currentX - x;
+        double diffd = currentY - y;
+        double ps = diffs / 80.0;
+        double pd = diffd / 80.0;
+        is = ((closeTo(x, currentY, 15, pipeline) && !closeTo(x, currentY, 0, pipeline)) ? is + diffd : 0) / 90;
+        id = ((closeTo(currentX, y, 15, pipeline) && !closeTo(currentX, y, 0, pipeline)) ? id + diffs : 0) / 90;
+        strafe = ps;
+        drive = pd;
+        strafe*= power;
+        drive*= power;
     }
-    public void goToPoint(int x, int y, BackboardPipeline pipeline, boolean straight) {
+    public void goToPoint(int x, int y, BackboardPipeline pipeline, boolean straight, double power) {
         if (straight) {
             turnTo(0);
         }
         if (pipeline.detected()) {
             prevX = pipeline.getX();
             prevY = pipeline.getY();
-            goToPoint(x, y, pipeline.getX(), pipeline.getY(), pipeline, straight);
+            goToPoint(x, y, pipeline.getX(), pipeline.getY(), pipeline, power);
         }
 //        else
 //            goToPoint(x, y, prevX, prevY, pipeline, straight);
     }
     public void goToPoint(int x, int y, BackboardPipeline pipeline) {
-        goToPoint(x, y, pipeline, true);
+        goToPoint(x, y, pipeline, 1);
+    }
+    public void goToPoint(int x, int y, BackboardPipeline pipeline, double power) {
+        goToPoint(x, y, pipeline, true, 1);
     }
 
-    public void shoot(int power) {
-        robotHardware.shooter.setVelocity(power);
+    public void shoot(int velocity) {
+        robotHardware.shooter.setVelocity(velocity);
 
-        if (Math.abs(robotHardware.shooter.getVelocity() - power) < 200) {
+        if (Math.abs(robotHardware.shooter.getVelocity() - velocity) < 200) {
             robotHardware.blocker.setPosition(constants.blockerUp);
             robotHardware.intake.setPower(0.5);
             robotHardware.cleanser.setPower(0.5);
@@ -98,7 +111,7 @@ public class Movement {
     }
 
     public boolean closeTo(int x, int y, int closeness, BackboardPipeline pipeline) {
-        return Math.sqrt(Math.abs(Math.pow(x - pipeline.getX(), 2) + Math.pow(y - pipeline.getY(), 2))) < closeness;
+        return Math.sqrt(Math.abs(Math.pow(x - pipeline.getX(), 2) + Math.pow(y - pipeline.getY(), 2))) <= closeness;
 
     }
     public boolean closeTo(int x, int y, BackboardPipeline pipeline) {

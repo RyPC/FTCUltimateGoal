@@ -50,17 +50,27 @@ public class Teleop extends LinearOpMode {
 
         robotHardware.wobbleClamp.setPosition(constants.clampOpen);
         while (opModeIsActive() && !isStopRequested()) {
+            teleOpControls.notDriving();
+            teleOpControls.eggs1();
             if (this.gamepad1.y) {
                 movement.resetPower();
-                movement.turnToX(135, pipeline);
+                if (teleOpControls.bPressed) {
+                    robotHardware.blocker.setPosition(constants.blockerUp);
+                    movement.turn = 0.175;
+                    if (robotHardware.getAngle() > 3)
+                        robotHardware.intakeOn();
+                    else
+                        robotHardware.intakeOff();
+                }
+                else
+                    movement.goToPoint(133, 124, pipeline);
                 movement.setPowers();
             }
             else {
-                teleOpControls.notDriving();
                 teleOpControls.normalDrive();
-//                teleOpControls.eggs2();
-                teleOpControls.eggs1();
+                teleOpControls.blocker();
             }
+
             telemetry.addData("imu", robotHardware.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
             telemetry.addData("Mode", teleOpControls.getB() ? "low" : "high");
             telemetry.addData("Shooter Vel", robotHardware.shooter.getVelocity());
