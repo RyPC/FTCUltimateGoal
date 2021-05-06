@@ -68,7 +68,7 @@ public class Teleop extends LinearOpMode {
             }
             else {
                 teleOpControls.normalDrive();
-                teleOpControls.blocker();
+                teleOpControls.noCheckBlocker();
             }
 
             telemetry.addData("imu", robotHardware.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);

@@ -84,8 +84,12 @@ public class RobotHardware {
     }
 
     //gets imu angle
+    public double getRealAngle() {
+        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+
+    }
     public double getAngle() {
-        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle + angleAdjustment;
+        return getRealAngle() + angleAdjustment;
     }
     //initialization
     public void init (HardwareMap hwMap, boolean initServos) {
@@ -171,7 +175,7 @@ public class RobotHardware {
     public void initServos() {
         wobbleArm.setPosition(constants.armUp);
         wobbleClamp.setPosition(constants.clampClosed);
-        blocker.setPosition(constants.blockerUp);
+        blocker.setPosition(constants.blockerDown);
         rightEgg.setPosition(constants.rightEggUp);
         leftEgg.setPosition(constants.leftEggUp);
     }
@@ -548,6 +552,7 @@ public class RobotHardware {
             fl.setPower(power + correction);
             br.setPower(power - correction);
             bl.setPower(power + correction);
+            shooter.setVelocity(shooterPower);
 
             //shoots if shooter is at speed
             if (shoot) {
@@ -568,10 +573,11 @@ public class RobotHardware {
         brake();
     }
     public void drivePower(int inches, double power, int angle) {
-        drivePower(inches, power, false, angle, 0);
+        drivePower(inches, power, false, angle, constants.shooterPower);
     }
     public void drivePower(int inches, double power) {
-        drivePower(inches, power, false, 0, 0);
+        blocker.setPosition(constants.blockerDown);
+        drivePower(inches, power, false, 0, constants.shooterPower);
     }
 
     //shoot for given time

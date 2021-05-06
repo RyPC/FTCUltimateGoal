@@ -44,6 +44,7 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
 
         while (!isStarted() && !isStopRequested()) {
             if (pipeline.detected()) {
+                movement.block();
                 telemetry.addLine("Pos: [" + pipeline.getX() + ", " + pipeline.getY() + "]");
 
                 int[] left = pipeline.getLeft();
@@ -68,9 +69,9 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
         int stage = 0;
         int prevStage = -1;
 
+        robotHardware.shooter.setVelocity(constants.shooterPower);
         while(opModeIsActive() && !isStopRequested()) {
             movement.resetPower();
-            robotHardware.shooter.setVelocity(constants.shooterPower);
 
             if (stage != prevStage) {
                 elapsedTime.reset();
@@ -81,17 +82,19 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
                 case 0:
                     //wobble goal
                     robotHardware.shooter.setVelocity(constants.shooterPower);
-                    robotHardware.drivePower(113, 0.75, false, 0, 0);
+                    robotHardware.drivePower(113, 1);
                     robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                    robotHardware.strafePower(7, 1);
+                    robotHardware.strafePower(4, 1);
                     robotHardware.strafePower(-11, -1);
-                    robotHardware.drivePower(-36, -0.9);
+                    robotHardware.drivePower(-38, -0.9);
                     robotHardware.wobbleClamp.setPosition(constants.clampClosed);
+                    robotHardware.sleep(250);
                     stage++;
                     break;
                 case 1:
                 case 4:
                 case 7:
+                case 9:
                     //shoot
                     if (robotHardware.blocker.getPosition() != constants.blockerUp)
                         movement.goToPoint(135, 135, pipeline);
@@ -99,8 +102,11 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
                         movement.shoot();
                         robotHardware.intakeOn();
                     }
-                    if (elapsedTime.milliseconds() > (stage == 1 ? 3000 : 3500))
+                    if (elapsedTime.milliseconds() > (stage == 1 ? 3000 : 3500)) {
                         stage++;
+                        movement.block();
+                    }
+                    robotHardware.shooter.setVelocity(constants.shooterPower);
                     break;
                 case 2:
                     //line up for rings
@@ -113,8 +119,8 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
                     //collect stack
                     robotHardware.intakeOn();
                     robotHardware.turnTo(90);
-                    robotHardware.drivePower(16, 0.15, 90);
-                    robotHardware.intake.setPower(-1);
+                    robotHardware.drivePower(13, 0.15, 90);
+                    robotHardware.intake.setPower(-0.75);
                     robotHardware.drivePower(-4, -1, 90);
                     robotHardware.intakeOn();
                     movement.block();
@@ -122,7 +128,8 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
                     break;
                 case 5:
                     //line up for 2nd wobble
-                    movement.goToPoint(147, 208, pipeline, 1.5);
+                    robotHardware.intakeOff();
+                    movement.goToPoint(141, 212, pipeline, 1);
                     if (elapsedTime.milliseconds() > 2500)
                         stage++;
                     break;
@@ -133,6 +140,7 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
                     robotHardware.wobbleClamp.setPosition(constants.clampOpen);
                     robotHardware.strafePower(14, 0.3333);
                     robotHardware.wobbleClamp.setPosition(constants.clampClosed);
+                    robotHardware.intakeOn();
                     robotHardware.sleep(333);
                     robotHardware.strafePower(10,1);
                     robotHardware.drivePower(10, 1, 0);
@@ -142,20 +150,23 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
                     break;
                 case 8:
                     //drive to and deposit wobble
-                    robotHardware.drivePower(48, 0.75);
+                    robotHardware.drivePower(50, 0.75);
                     robotHardware.strafePower(6, 0.75);
                     robotHardware.wobbleClamp.setPosition(constants.clampOpen);
+                    robotHardware.wobbleArm.setPosition(constants.armUp);
                     robotHardware.strafePower(-4, -0.75);
-                    robotHardware.drivePower(-37, -1);
+                    robotHardware.drivePower(-40, -1);
                     robotHardware.wobbleClamp.setPosition(constants.clampClosed);
-                    stage = 10;
+                    stage++;
                     break;
                 case 10:
                     //pp-pp-pparkkk
                     robotHardware.intakeOff();
                     movement.goToPoint(153, 90, pipeline);
                     break;
-
+                default:
+                    stage = 10;
+                    break;
             }
 
             if (totalTime.milliseconds() > 29000)
@@ -163,15 +174,16 @@ public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends Linea
             movement.setPowers();
             telemetry.addData("Stage", stage);
             telemetry.addData("Detected", pipeline.detected());
-            int[] left = pipeline.getLeft();
-            telemetry.addLine("Left: [" + left[0] + ", " + left[1] + "]");
-            int[] right = pipeline.getLeft();
-            telemetry.addLine("Right: [" + right[0] + ", " + right[1] + "]");
-            telemetry.addLine("Pos: [" + pipeline.getX() + ", " + pipeline.getY() + "]");
-            telemetry.addData("time", elapsedTime.milliseconds());
-            telemetry.addLine("RGB");
-            telemetry.addData("Right", Arrays.toString(pipeline.getRight()));
-            telemetry.addData("Left", Arrays.toString(pipeline.getLeft()));
+            telemetry.addData("Shooter Power", robotHardware.shooter.getPower());
+//            int[] left = pipeline.getLeft();
+//            telemetry.addLine("Left: [" + left[0] + ", " + left[1] + "]");
+//            int[] right = pipeline.getLeft();
+//            telemetry.addLine("Right: [" + right[0] + ", " + right[1] + "]");
+//            telemetry.addLine("Pos: [" + pipeline.getX() + ", " + pipeline.getY() + "]");
+            telemetry.addData("time", totalTime.milliseconds());
+//            telemetry.addLine("RGB");
+//            telemetry.addData("Right", Arrays.toString(pipeline.getRight()));
+//            telemetry.addData("Left", Arrays.toString(pipeline.getLeft()));
             telemetry.update();
         }
     }

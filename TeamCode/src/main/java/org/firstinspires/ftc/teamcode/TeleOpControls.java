@@ -90,7 +90,7 @@ public class TeleOpControls {
             bDown = false;
         }
 
-        shooterSpeed = bPressed ? constants.shooterPower - 50: constants.shooterPower;
+        shooterSpeed = bPressed ? constants.shooterPower - 100: constants.shooterPower;
 
         //changing angle with dpad right/left
         if (op.gamepad1.dpad_right && !dPRDown) {
@@ -105,14 +105,19 @@ public class TeleOpControls {
         }
         else if (!op.gamepad1.dpad_left)
             dPLDown = false;
+        if (op.gamepad1.dpad_up)
+            robotHardware.angleAdjustment = -robotHardware.getRealAngle();
 
     }
-    public void blocker() {
+    public void checkBlocker() {
         if (!gateOpen && Math.abs(robotHardware.shooter.getVelocity() - shooterSpeed) <= 10 && op.gamepad1.a)
             gateOpen = true;
         else if (gateOpen && !op.gamepad1.a)
             gateOpen = false;
         robotHardware.blocker.setPosition(gateOpen ? constants.blockerUp : constants.blockerDown);
+    }
+    public void noCheckBlocker() {
+        robotHardware.blocker.setPosition(op.gamepad1.a ? constants.blockerUp : constants.blockerDown);
     }
 
     public void normalDrive() {

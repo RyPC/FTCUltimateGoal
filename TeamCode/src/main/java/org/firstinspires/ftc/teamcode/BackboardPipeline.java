@@ -102,7 +102,7 @@ public class BackboardPipeline extends OpenCvPipeline {
         return input;
     }
     public boolean checkRed(double[] rgb) {
-        return rgb[0] > (rgb[1] + rgb[2]) * 0.8 && rgb[1] + rgb[2] < 200 && rgb[0] > 130;
+        return rgb[0] > (rgb[1] + rgb[2]) * 0.8 && rgb[1] + rgb[2] < 200 && rgb[0] > 120;
     }
 
     public int getX() {

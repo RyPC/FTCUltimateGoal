@@ -3,12 +3,12 @@ package org.firstinspires.ftc.teamcode;
 public class Constants {
 
     public final int shooterPower = 1340;
-    public final double clampClosed = 0.1;
+    public final double clampClosed = 0.225;
     public final double clampOpen = 0.55;
     public final double armDown = 0.9;
     public final double armUp = 0.45;
-    public final double blockerDown = 0.4;
-    public final double blockerUp = 0.3;
+    public final double blockerDown = 0.35;
+    public final double blockerUp = 0.23;
     public final double rightEggDown = 0;
     public final double rightEggUp = 0.75;
     public final double leftEggDown = 1;
