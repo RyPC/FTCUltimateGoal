@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.visionAutons;
+package org.firstinspires.ftc.teamcode.actualVision;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -15,8 +15,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.Arrays;
 
-@Autonomous(name = "PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG", group = "Vision")
-public class PeePeeInnerSpecificAutonYaaaHEHEEEhahahahaGGGEGEGAGAG extends LinearOpMode {
+@Autonomous(name = "Red 4 Ring Double Wobble", group = "Vision")
+public class RedDoubleWobble4Ring extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();

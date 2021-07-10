@@ -137,7 +137,7 @@ public class RobotHardware {
 
         //setting direction of motors (none of them were black to red and red to black don't worry)
         shooter.setDirection(DcMotorEx.Direction.REVERSE);
-        fr.setDirection(DcMotorSimple.Direction.REVERSE);
+        fr.setDirection(DcMotorSimple.Direction.FORWARD);
         fl.setDirection(DcMotorSimple.Direction.FORWARD);
         br.setDirection(DcMotorSimple.Direction.FORWARD);
         bl.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -520,7 +520,7 @@ public class RobotHardware {
         double neededTicks = inches * constants.ticksPerTok;
         double currentTicks = -fr.getCurrentPosition();
         while (Math.abs(currentTicks - neededTicks) > 50 && op.opModeIsActive()) {
-            currentTicks = fr.getCurrentPosition();
+            currentTicks = -fr.getCurrentPosition();
 
             double currentAngle = getAngle();
 
@@ -538,9 +538,9 @@ public class RobotHardware {
     public void drivePower(int inches, double power, boolean shoot, int angle, int shooterPower) {
         resetEncoders();
         double neededTicks = inches * constants.ticksPerTok;
-        double currentTicks = -fr.getCurrentPosition();
+        double currentTicks = fr.getCurrentPosition();
         while (Math.abs(currentTicks - neededTicks) > 50 && op.opModeIsActive()) {
-            currentTicks = -fr.getCurrentPosition();
+            currentTicks = fr.getCurrentPosition();
 
             double currentAngle = getAngle();
 

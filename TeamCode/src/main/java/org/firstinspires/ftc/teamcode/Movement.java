@@ -1,13 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Point;
-import android.text.method.BaseKeyListener;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.internal.hardware.android.GpioPin;
 
 public class Movement {
 

@@ -65,14 +65,14 @@ public class BackboardPipeline extends OpenCvPipeline {
             return input;
         for (int i = 0; i < height; i+= 3) {
             for (int j = 0; j < width; j+= 3) {
-                if (i + j < rowCol1 && checkRed(input.get(i, j))) {
+                if (i + j < rowCol1 && (color == Color.RED ? checkRed(input.get(i, j)) : checkBlue(input.get(i, j)))) {
                     row1 = (int)j;
                     col1 = (int)i;
                     rowCol1 = i + j;
                     if (i + 10 < height)
                         height = i + 10;
                 }
-                else if (i - j < rowCol2 && checkRed(input.get(i, j))) {
+                else if (i - j < rowCol2 && (color == Color.RED ? checkRed(input.get(i, j)) : checkBlue(input.get(i, j)))) {
                     row2 = (int)j;
                     col2 = (int)i;
                     rowCol2 = i - j;
@@ -102,7 +102,10 @@ public class BackboardPipeline extends OpenCvPipeline {
         return input;
     }
     public boolean checkRed(double[] rgb) {
-        return rgb[0] > (rgb[1] + rgb[2]) * 0.8 && rgb[1] + rgb[2] < 200 && rgb[0] > 120;
+        return rgb[0] > (rgb[1] + rgb[2]) * 0.8 && rgb[1] + rgb[2] < 255 && rgb[0] > 100;
+    }
+    public boolean checkBlue(double[] rgb) {
+        return rgb[2] > (rgb[0] + rgb[1]) * 0.7 && rgb[0] + rgb[1] < 200 && rgb[2] > 100;
     }
 
     public int getX() {
@@ -137,6 +140,6 @@ public class BackboardPipeline extends OpenCvPipeline {
     }
 
     public boolean detected() {
-        return (right[0] + left[0] + right[1] + left[1] != 0) && checkRed(getRGB()) && getWidth() > 10;
+        return (right[0] + left[0] + right[1] + left[1] != 0) && (color == Color.RED ? checkRed(getRGB()) : checkBlue(getRGB())) && getWidth() > 10;
     }
 }

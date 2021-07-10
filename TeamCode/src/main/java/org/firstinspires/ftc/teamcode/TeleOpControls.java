@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.robot.Robot;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.enums.Color;
@@ -28,6 +28,8 @@ public class TeleOpControls {
     boolean eggDown = false;
     boolean eggPressed = false;
     boolean gateOpen = false;
+    boolean aDown = false;
+    ElapsedTime shootTime = new ElapsedTime();
 
 
     public TeleOpControls(LinearOpMode op, RobotHardware robotHardware, Telemetry telemetry) {
@@ -41,10 +43,16 @@ public class TeleOpControls {
 
         //intake/cleanser
         //  right stick
-        //  only fires shots when the shooter is up to a range of speeds
-        //  back-take cleanser/intake when shooter starts to prevent jamming
-        robotHardware.intake.setPower(op.gamepad1.a ? 1 : op.gamepad1.right_stick_y);
-        robotHardware.cleanser.setPower(op.gamepad1.a ? 0.75 : op.gamepad1.right_stick_y * 0.75);
+        // outtake for a bit before shooting rings using 'a'
+        if (op.gamepad1.a && !aDown) {
+            aDown = true;
+            shootTime.reset();
+        }
+        else if (!op.gamepad1.a && aDown) {
+            aDown = false;
+        }
+        robotHardware.intake.setPower(op.gamepad1.a ? (shootTime.milliseconds() < 150 ? -1 : 1) : op.gamepad1.right_stick_y);
+        robotHardware.cleanser.setPower(op.gamepad1.a ? (shootTime.milliseconds() < 150 ? -1 : 1) : op.gamepad1.right_stick_y * 0.75);
 
         //shooter
         //  A toggle on/off

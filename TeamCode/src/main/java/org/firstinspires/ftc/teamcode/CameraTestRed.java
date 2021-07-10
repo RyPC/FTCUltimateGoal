@@ -1,20 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.function.Continuation;
 import org.firstinspires.ftc.teamcode.enums.Color;
-import org.firstinspires.ftc.teamcode.enums.Rings;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
-@TeleOp(name = "camera test", group = "TeleOp")
+@TeleOp(name = "camera test red", group = "TeleOp")
 //@Disabled
-public class CameraTest extends LinearOpMode {
+public class CameraTestRed extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     TeleOpControls teleOpControls = new TeleOpControls(this, robotHardware, telemetry);
