@@ -11,8 +11,8 @@ import org.firstinspires.ftc.teamcode.Pipeline;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.firstinspires.ftc.teamcode.enums.Rings;
-import org.firstinspires.ftc.teamcode.enums.Stages;
 import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 //Red Inner
@@ -24,6 +24,8 @@ public class RedInner extends LinearOpMode {
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
     Rings position;
+    OpenCvCamera ringCamera;
+    int cameraMonitorViewId;
 
     @Override
     public void runOpMode() {
@@ -32,13 +34,16 @@ public class RedInner extends LinearOpMode {
         telemetry.addLine("Setting up camera...");
         telemetry.update();
 
-        Pipeline pipeline = new Pipeline(Color.RED);
-        robotHardware.camera.setPipeline(pipeline);
+        cameraMonitorViewId = robotHardware.hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robotHardware.hwMap.appContext.getPackageName());
+        ringCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.ringWebcam);
 
-        robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        Pipeline pipeline = new Pipeline(Color.RED);
+        ringCamera.setPipeline(pipeline);
+
+        ringCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+                ringCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.UPSIDE_DOWN);
             }
         });
 
@@ -50,7 +55,7 @@ public class RedInner extends LinearOpMode {
             telemetry.addLine("one: [" + pipeline.getRed(Rings.ONE) + ", " + pipeline.getGreen(Rings.ONE) + ", " + pipeline.getBlue(Rings.ONE) + "]");
             telemetry.update();
         }
-        robotHardware.camera.stopStreaming();
+        ringCamera.stopStreaming();
 
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.reset();

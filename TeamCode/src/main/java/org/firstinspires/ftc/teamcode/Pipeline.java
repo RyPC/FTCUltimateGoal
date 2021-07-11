@@ -1,3 +1,4 @@
+//Pipeline for ring stack during init
 package org.firstinspires.ftc.teamcode;
 
 import org.firstinspires.ftc.teamcode.enums.Color;
@@ -17,7 +18,7 @@ public class Pipeline  extends OpenCvPipeline {
     boolean four = false;
 
     public Pipeline(Color color) {
-        //change values based on the side of the field
+        //change values based on the side of the field?
         if (color == Color.RED) {
             constants.heightOne = 195;
             constants.heightFour = 165;

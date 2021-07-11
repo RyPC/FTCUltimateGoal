@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Movement;
 import org.firstinspires.ftc.teamcode.RingsPipeline;
 import org.firstinspires.ftc.teamcode.RobotHardware;
-import org.firstinspires.ftc.teamcode.enums.Color;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
@@ -28,12 +27,12 @@ public class LookyRings extends LinearOpMode {
         telemetry.update();
 
         RingsPipeline pipeline = new RingsPipeline();
-        robotHardware.camera.setPipeline(pipeline);
+        robotHardware.backboardCamera.setPipeline(pipeline);
 
-        robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        robotHardware.backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_LEFT);
+                robotHardware.backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
 

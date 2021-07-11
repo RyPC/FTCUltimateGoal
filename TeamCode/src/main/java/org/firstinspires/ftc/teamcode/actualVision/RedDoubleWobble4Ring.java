@@ -8,10 +8,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.BackboardPipeline;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Movement;
+import org.firstinspires.ftc.teamcode.Pipeline;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.enums.Color;
+import org.firstinspires.ftc.teamcode.enums.Rings;
 import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvViewport;
 
 import java.util.Arrays;
 
@@ -21,6 +25,8 @@ public class RedDoubleWobble4Ring extends LinearOpMode {
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
     Movement movement = new Movement(this, robotHardware, telemetry);
+    OpenCvCamera backboardCamera;
+    OpenCvCamera ringCamera;
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -30,18 +36,25 @@ public class RedDoubleWobble4Ring extends LinearOpMode {
         telemetry.addLine("Setting up camera...");
         telemetry.update();
 
-        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
-        robotHardware.camera.setPipeline(pipeline);
+        backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam);
+        ringCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.ringWebcam);
 
-        robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
+        Pipeline ringPipeline = new Pipeline(Color.RED);
+
+        backboardCamera.setPipeline(pipeline);
+        ringCamera.setPipeline(ringPipeline);
+
+        ringCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_LEFT);
+                ringCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.UPRIGHT);
             }
         });
         telemetry.addLine("Ready for Start");
         telemetry.update();
 
+        Rings position;
         while (!isStarted() && !isStopRequested()) {
             if (pipeline.detected()) {
                 movement.block();
@@ -55,11 +68,21 @@ public class RedDoubleWobble4Ring extends LinearOpMode {
                 telemetry.addLine("RGB");
                 telemetry.addData("Left", Arrays.toString(pipeline.getRGBLeft()));
                 telemetry.addData("Right", Arrays.toString(pipeline.getRGBRight()));
-                telemetry.update();
-
             }
+            position = ringPipeline.getPosition();
+            telemetry.addData("Position", position);
+            telemetry.update();
 
         }
+
+        //stop ring camera and start backboard camera
+        ringCamera.stopStreaming();
+        backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
+            }
+        });
 
         ElapsedTime elapsedTime = new ElapsedTime();
         ElapsedTime totalTime = new ElapsedTime();
@@ -97,8 +120,8 @@ public class RedDoubleWobble4Ring extends LinearOpMode {
                 case 9:
                     //shoot
                     if (robotHardware.blocker.getPosition() != constants.blockerUp)
-                        movement.goToPoint(135, 135, pipeline);
-                    if (movement.closeTo(135, 135, 15, pipeline)) {
+                        movement.goToPoint(135, 120, pipeline);
+                    if (movement.closeTo(135, 120, 15, pipeline)) {
                         movement.shoot();
                         robotHardware.intakeOn();
                     }
@@ -159,13 +182,13 @@ public class RedDoubleWobble4Ring extends LinearOpMode {
                     robotHardware.wobbleClamp.setPosition(constants.clampClosed);
                     stage++;
                     break;
-                case 10:
+                case 100:
                     //pp-pp-pparkkk
                     robotHardware.intakeOff();
                     movement.goToPoint(153, 90, pipeline);
                     break;
                 default:
-                    stage = 10;
+                    stage++;
                     break;
             }
 

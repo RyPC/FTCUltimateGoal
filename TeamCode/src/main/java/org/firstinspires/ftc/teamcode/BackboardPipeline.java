@@ -21,9 +21,9 @@ public class BackboardPipeline extends OpenCvPipeline {
     Constants constants;
     int[] left = {0, 0};
     int[] right = {0, 0};
-    double[] rgbL;
-    double[] rgb;
-    double[] rgbR;
+    public double[] rgbL;
+    public double[] rgb;
+    public double[] rgbR;
 
     Mat hsv = new Mat();
     Mat redMat = new Mat();
@@ -69,15 +69,15 @@ public class BackboardPipeline extends OpenCvPipeline {
                     row1 = (int)j;
                     col1 = (int)i;
                     rowCol1 = i + j;
-                    if (i + 10 < height)
-                        height = i + 10;
+                    if (i + 30 < height)
+                        height = i + 30;
                 }
                 else if (i - j < rowCol2 && (color == Color.RED ? checkRed(input.get(i, j)) : checkBlue(input.get(i, j)))) {
                     row2 = (int)j;
                     col2 = (int)i;
                     rowCol2 = i - j;
-                    if (i + 10 < height)
-                        height = i + 10;
+                    if (i + 30 < height)
+                        height = i + 30;
                 }
             }
         }
@@ -102,10 +102,10 @@ public class BackboardPipeline extends OpenCvPipeline {
         return input;
     }
     public boolean checkRed(double[] rgb) {
-        return rgb[0] > (rgb[1] + rgb[2]) * 0.8 && rgb[1] + rgb[2] < 255 && rgb[0] > 100;
+        return rgb[0] > (rgb[1] + rgb[2]) * 0.8 && rgb[1] + rgb[2] < 280 && rgb[0] > 100;
     }
     public boolean checkBlue(double[] rgb) {
-        return rgb[2] > (rgb[0] + rgb[1]) * 0.7 && rgb[0] + rgb[1] < 200 && rgb[2] > 100;
+        return rgb[2] > (rgb[0] + rgb[1]) * 0.7 && rgb[0] + rgb[1] < 300 && rgb[2] > 100;
     }
 
     public int getX() {

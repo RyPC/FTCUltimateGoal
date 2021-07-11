@@ -51,8 +51,14 @@ public class TeleOpControls {
         else if (!op.gamepad1.a && aDown) {
             aDown = false;
         }
-        robotHardware.intake.setPower(op.gamepad1.a ? (shootTime.milliseconds() < 150 ? -1 : 1) : op.gamepad1.right_stick_y);
-        robotHardware.cleanser.setPower(op.gamepad1.a ? (shootTime.milliseconds() < 150 ? -1 : 1) : op.gamepad1.right_stick_y * 0.75);
+        //outtake
+//        robotHardware.intake.setPower(op.gamepad1.a ? (shootTime.milliseconds() < 150 ? -1 : 1) : op.gamepad1.right_stick_y);
+//        robotHardware.cleanser.setPower(op.gamepad1.a ? (shootTime.milliseconds() < 150 ? -1 : 1) : op.gamepad1.right_stick_y * 0.75);
+        //no outtake
+        robotHardware.intake.setPower(op.gamepad1.a ? 1 : op.gamepad1.right_stick_y);
+        robotHardware.cleanser.setPower(op.gamepad1.a ? 1 : op.gamepad1.right_stick_y * 0.75);
+
+
 
         //shooter
         //  A toggle on/off
@@ -161,12 +167,12 @@ public class TeleOpControls {
 
     public void useCamera() {
         pipeline = new BackboardPipeline(Color.RED);
-        robotHardware.camera.setPipeline(pipeline);
+        robotHardware.backboardCamera.setPipeline(pipeline);
 
-        robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        robotHardware.backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_LEFT);
+                robotHardware.backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
     }

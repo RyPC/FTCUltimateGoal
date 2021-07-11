@@ -4,7 +4,6 @@ package org.firstinspires.ftc.teamcode.betterAutons;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Constants;
@@ -32,12 +31,12 @@ public class RedInnerStack extends LinearOpMode {
         telemetry.update();
 
         Pipeline pipeline = new Pipeline(Color.RED);
-        robotHardware.camera.setPipeline(pipeline);
+        robotHardware.backboardCamera.setPipeline(pipeline);
 
-        robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        robotHardware.backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+                robotHardware.backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_RIGHT);
             }
         });
 
@@ -51,7 +50,7 @@ public class RedInnerStack extends LinearOpMode {
             idle();
             sleep(50);
         }
-        robotHardware.camera.stopStreaming();
+        robotHardware.backboardCamera.stopStreaming();
 
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.reset();

@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.Pipeline;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.firstinspires.ftc.teamcode.enums.Rings;
-import org.firstinspires.ftc.teamcode.enums.Stages;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
@@ -33,12 +32,12 @@ public class BlueInner extends LinearOpMode {
         telemetry.update();
 
         Pipeline pipeline = new Pipeline(Color.BLUE);
-        robotHardware.camera.setPipeline(pipeline);
+        robotHardware.backboardCamera.setPipeline(pipeline);
 
-        robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        robotHardware.backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+                robotHardware.backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_RIGHT);
             }
         });
 
@@ -50,7 +49,7 @@ public class BlueInner extends LinearOpMode {
             telemetry.addLine("one: [" + pipeline.getRed(Rings.ONE) + ", " + pipeline.getGreen(Rings.ONE) + ", " + pipeline.getBlue(Rings.ONE) + "]");
             telemetry.update();
         }
-        robotHardware.camera.stopStreaming();
+        robotHardware.backboardCamera.stopStreaming();
 
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.reset();

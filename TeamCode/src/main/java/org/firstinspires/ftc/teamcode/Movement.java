@@ -42,10 +42,9 @@ public class Movement {
     }
     public void turnTo(double angle) {
         double currentAngle = robotHardware.getAngle();
-        double power = (angle - currentAngle) / 40;
-//        double power = (angle == 180) ? (currentAngle >= 0 ? currentAngle - 180 : 180 + currentAngle) : currentAngle - angle;
+        //        double power = (angle == 180) ? (currentAngle >= 0 ? currentAngle - 180 : 180 + currentAngle) : currentAngle - angle;
 
-        turn = power;
+        turn = (angle - currentAngle) / 40;
     }
     public void turnToX(int x, BackboardPipeline pipeline) {
         if (pipeline.detected()) {
@@ -109,7 +108,7 @@ public class Movement {
 //    }
 
     public boolean closeTo(int x, int y, int closeness, BackboardPipeline pipeline) {
-        return Math.sqrt(Math.abs(Math.pow(x - pipeline.getX(), 2) + Math.pow(y - pipeline.getY(), 2))) <= closeness;
+        return Math.sqrt(Math.abs(Math.pow(x- pipeline.getX(), 2) + Math.pow(y - pipeline.getY(), 2))) <= closeness;
 
     }
     public boolean closeTo(int x, int y, BackboardPipeline pipeline) {

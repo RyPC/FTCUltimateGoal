@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 
 @Autonomous(name="Hive Red 7 Ring", group="Auton")
 @Disabled
-public class WithHive extends LinearOpMode {
+public class HiveRed extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();

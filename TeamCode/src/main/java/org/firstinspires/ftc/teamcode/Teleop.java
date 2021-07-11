@@ -8,6 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @TeleOp(name = "pooMode", group = "TeleOp")
@@ -17,6 +18,7 @@ public class Teleop extends LinearOpMode {
     TeleOpControls teleOpControls = new TeleOpControls(this, robotHardware, telemetry);
     Constants constants = new Constants();
     Movement movement = new Movement(this, robotHardware, telemetry);
+    OpenCvCamera backboardCamera;
 
     @Override
     public void runOpMode() {
@@ -28,12 +30,13 @@ public class Teleop extends LinearOpMode {
         telemetry.update();
 
         BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
-        robotHardware.camera.setPipeline(pipeline);
+        backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam);
+        backboardCamera.setPipeline(pipeline);
 
-        robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.SIDEWAYS_LEFT);
+                backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
 

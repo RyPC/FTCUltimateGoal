@@ -1,3 +1,4 @@
+//Supposed pipeline for rings on the field during auton/teleop
 package org.firstinspires.ftc.teamcode;
 
 import org.opencv.core.Core;

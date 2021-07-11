@@ -1,42 +1,22 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.app.LauncherActivity;
-import android.os.DropBoxManager;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Const;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.robotserver.internal.webserver.controlhubupdater.ChUpdaterCommManager;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
-
-import java.lang.annotation.ElementType;
-import java.security.spec.EllipticCurve;
 
 public class RobotHardware {
 
@@ -47,10 +27,12 @@ public class RobotHardware {
     Constants constants = new Constants();
 
     //camera view in phone
-    int cameraMonitorViewId;
+//    int cameraMonitorViewId;
     //declaring camera
-    public WebcamName webcamName;
-    public OpenCvCamera camera;
+    public WebcamName backboardWebcam;
+    public WebcamName ringWebcam;
+    public OpenCvCamera backboardCamera;
+    public OpenCvCamera ringCamera;
 
     //declaring motors
     //shooter motor
@@ -75,7 +57,7 @@ public class RobotHardware {
     LinearOpMode op;
     Telemetry telemetry;
 
-    HardwareMap hwMap = null;
+    public HardwareMap hwMap = null;
 
     //constructor
     public RobotHardware(LinearOpMode op, Telemetry telemetry) {
@@ -114,9 +96,9 @@ public class RobotHardware {
         //eggs
         leftEgg = hwMap.get(Servo.class, "leftEgg");
         rightEgg = hwMap.get(Servo.class, "rightEgg");
-        //camera
-        webcamName = hwMap.get(WebcamName.class, "Looky");
-        cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
+        //cameras
+        backboardWebcam = hwMap.get(WebcamName.class, "Looky");
+        ringWebcam = hwMap.get(WebcamName.class, "Looky2");
 
         //reset encoders
         resetEncoders();
@@ -163,8 +145,9 @@ public class RobotHardware {
         imu = hwMap.get(BNO055IMU.class, "imu");
         resetGyro();
 
-        //live camera
-        camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
+        //live cameras (used in other files)
+//        backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(backboardWebcam);
+//        ringCamera = OpenCvCameraFactory.getInstance().createWebcam(ringWebcam);
 
         telemetry.addLine("Ready to Start");
         telemetry.update();

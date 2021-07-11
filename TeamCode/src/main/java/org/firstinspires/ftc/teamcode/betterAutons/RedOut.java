@@ -32,12 +32,12 @@ public class RedOut extends LinearOpMode {
         telemetry.update();
 
         Pipeline pipeline = new Pipeline(Color.BLUE);
-        robotHardware.camera.setPipeline(pipeline);
+        robotHardware.backboardCamera.setPipeline(pipeline);
 
-        robotHardware.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        robotHardware.backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.camera.startStreaming(constants.width, constants.height, OpenCvCameraRotation.UPRIGHT);
+                robotHardware.backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.UPRIGHT);
             }
         });
 
@@ -50,7 +50,7 @@ public class RedOut extends LinearOpMode {
             telemetry.addLine("one: [" + pipeline.getRed(Rings.ONE) + ", " + pipeline.getGreen(Rings.ONE) + ", " + pipeline.getBlue(Rings.ONE) + "]");
             telemetry.update();
         }
-        robotHardware.camera.stopStreaming();
+        robotHardware.backboardCamera.stopStreaming();
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.reset();
 

@@ -28,8 +28,8 @@ public class Constants {
     //camera stuff
     //top left - (0, 0)
     //camera dimensions
-    public final int width = 320;
-    public final int height = 240;
+    public final int cameraWidth = 320;
+    public final int cameraHeight = 240;
     //ring positions
     public int heightOne = 195;
     public int heightFour = 165;

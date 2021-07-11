@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.Movement;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
 @Autonomous(name="TestAuton", group="Auton")
-//@Disabled
+@Disabled
 public class TestAuton extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
