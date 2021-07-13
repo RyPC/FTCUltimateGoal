@@ -25,16 +25,10 @@ public class TestAuton extends LinearOpMode {
 
         waitForStart();
 
-        robotHardware.shooter.setVelocity(constants.shooterPower);
-        robotHardware.intakeOn();
-        robotHardware.drivePower(113, 0.2);
-        robotHardware.shooter.setVelocity(constants.shooterPower);
-        robotHardware.drivePower(-113, -0.2);
-//        robotHardware.drivePower(113, 0.75, true, 0, constants.shooterPower);
-        robotHardware.brake();
-        robotHardware.shooter.setVelocity(constants.shooterPower);
-        while (opModeIsActive()) {
-            idle();
-        }
+
+
+        robotHardware.turnTo(180);
+        robotHardware.driveTo(100, 180);
+
     }
 }

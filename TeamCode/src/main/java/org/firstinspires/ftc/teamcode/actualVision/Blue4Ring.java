@@ -26,8 +26,9 @@ public class Blue4Ring extends LinearOpMode {
     Constants constants = new Constants();
     Movement movement = new Movement(this, robotHardware, telemetry);
     OpenCvCamera backboardCamera;
-    OpenCvCamera ringCamera;
+    int cameraMonitorViewId;
     int shooterPower = constants.shooterPower + 45;
+    RingCameraThread cameraThread;
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -37,53 +38,35 @@ public class Blue4Ring extends LinearOpMode {
         telemetry.addLine("Setting up camera...");
         telemetry.update();
 
+        cameraMonitorViewId = robotHardware.hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robotHardware.hwMap.appContext.getPackageName());
         backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam);
-        ringCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.ringWebcam);
 
-        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
-        Pipeline ringPipeline = new Pipeline(Color.RED);
-
+        BackboardPipeline pipeline = new BackboardPipeline(Color.BLUE);
         backboardCamera.setPipeline(pipeline);
-        ringCamera.setPipeline(ringPipeline);
 
-        ringCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                ringCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.UPRIGHT);
-            }
-        });
-        telemetry.addLine("Ready for Start");
-        telemetry.update();
-
-        Rings position;
-        while (!isStarted() && !isStopRequested()) {
-            if (pipeline.detected()) {
-                movement.block();
-                telemetry.addLine("Pos: [" + pipeline.getX() + ", " + pipeline.getY() + "]");
-
-                int[] left = pipeline.getLeft();
-                telemetry.addLine("Left: [" + left[0] + ", " + left[1] + "]");
-                int[] right = pipeline.getRight();
-                telemetry.addLine("Right: [" + right[0] + ", " + right[1] + "]");
-                telemetry.addLine("Size: [" + pipeline.getWidth() + ", " + pipeline.getHeight() + "]");
-                telemetry.addLine("RGB");
-                telemetry.addData("Left", Arrays.toString(pipeline.getRGBLeft()));
-                telemetry.addData("Right", Arrays.toString(pipeline.getRGBRight()));
-            }
-            position = ringPipeline.getPosition();
-            telemetry.addData("Position", position);
-            telemetry.update();
-
-        }
-
-        //stop ring camera and start backboard camera
-        ringCamera.stopStreaming();
         backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
                 backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
+
+        //start ring camera thread
+        cameraThread = new RingCameraThread(this, telemetry, Color.BLUE);
+        cameraThread.start();
+
+
+        telemetry.addLine("Ready for Start");
+        telemetry.update();
+
+//        Rings position;
+//        while (!isStarted() && !isStopRequested()) {
+//            position = cameraThread.getPosition();
+//            telemetry.addData("Position", position);
+//            telemetry.update();
+//        }
+        waitForStart();
+
 
         ElapsedTime elapsedTime = new ElapsedTime();
         ElapsedTime totalTime = new ElapsedTime();

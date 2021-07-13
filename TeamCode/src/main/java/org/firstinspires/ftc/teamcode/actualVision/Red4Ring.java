@@ -26,7 +26,6 @@ public class Red4Ring extends LinearOpMode {
     Constants constants = new Constants();
     Movement movement = new Movement(this, robotHardware, telemetry);
     OpenCvCamera backboardCamera;
-    OpenCvCamera ringCamera;
     int cameraMonitorViewId;
     @Override
 
@@ -41,18 +40,15 @@ public class Red4Ring extends LinearOpMode {
         cameraMonitorViewId = robotHardware.hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robotHardware.hwMap.appContext.getPackageName());
 
         backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam);
-        ringCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.ringWebcam);
 
         BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
-        Pipeline ringPipeline = new Pipeline(Color.RED);
 
         backboardCamera.setPipeline(pipeline);
-        ringCamera.setPipeline(ringPipeline);
 
-        ringCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                ringCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.UPSIDE_DOWN);
+                backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.UPSIDE_DOWN);
             }
         });
         telemetry.addLine("Ready for Start");
@@ -73,20 +69,9 @@ public class Red4Ring extends LinearOpMode {
                 telemetry.addData("Left", Arrays.toString(pipeline.getRGBLeft()));
                 telemetry.addData("Right", Arrays.toString(pipeline.getRGBRight()));
             }
-            position = ringPipeline.getPosition();
-            telemetry.addData("Position", position);
             telemetry.update();
 
         }
-
-        //stop ring camera and start backboard camera
-        ringCamera.stopStreaming();
-        backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
-            }
-        });
 
         ElapsedTime elapsedTime = new ElapsedTime();
         ElapsedTime totalTime = new ElapsedTime();

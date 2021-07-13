@@ -18,7 +18,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 //Red Inner
 //High goal guess wobble
 @Autonomous(name="Red Inner", group="Auton")
-@Disabled
+//@Disabled
 public class RedInner extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
