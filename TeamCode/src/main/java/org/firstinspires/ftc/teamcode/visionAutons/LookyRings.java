@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.visionAutons;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Constants;
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
+@Disabled
 @Autonomous(name = "Looky Rings", group = "Vision")
 public class LookyRings extends LinearOpMode {
 

@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Pipeline;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.firstinspires.ftc.teamcode.enums.Rings;
+import org.firstinspires.ftc.teamcode.enums.Side;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -18,7 +19,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 //Red Inner
 //High goal guess wobble
 @Autonomous(name="Red Inner", group="Auton")
-//@Disabled
+@Disabled
 public class RedInner extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
@@ -37,7 +38,7 @@ public class RedInner extends LinearOpMode {
         cameraMonitorViewId = robotHardware.hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robotHardware.hwMap.appContext.getPackageName());
         ringCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.ringWebcam);
 
-        Pipeline pipeline = new Pipeline(Color.RED);
+        Pipeline pipeline = new Pipeline(Color.RED, Side.LEFT);
         ringCamera.setPipeline(pipeline);
 
         ringCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {

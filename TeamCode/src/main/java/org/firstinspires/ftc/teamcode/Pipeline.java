@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.firstinspires.ftc.teamcode.enums.Rings;
+import org.firstinspires.ftc.teamcode.enums.Side;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -13,19 +14,18 @@ public class Pipeline  extends OpenCvPipeline {
 
     Constants constants = new Constants();
 
+    Color color;
+    Side side;
     double[][] RGB = {{0, 0, 0}, {0, 0, 0}};
     boolean one = false;
     boolean four = false;
 
-    public Pipeline(Color color) {
+    public Pipeline(Color color, Side side) {
         //change values based on the side of the field?
-        if (color == Color.RED) {
-            constants.heightOne = 195;
-            constants.heightFour = 165;
-        }
-        else {
-            constants.heightOne = 201;
-            constants.heightFour = 171;
+        this.color = color;
+        this.side = side;
+        if (side == Side.LEFT) {
+            constants.ringWidth = 310;
         }
     }
 
@@ -33,12 +33,12 @@ public class Pipeline  extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
         //scan ring 1
-        RGB[0] = input.get(constants.heightOne, constants.widthOne);
-        Imgproc.circle(input, new Point(constants.widthOne, constants.heightOne), 10, new Scalar(0, 255, 0, 0));
+        RGB[0] = input.get(constants.heightOne, constants.ringWidth);
+        Imgproc.circle(input, new Point(constants.ringWidth, constants.heightOne), 10, new Scalar(0, 255, 0, 0));
 
         //scan ring 2
-        RGB[1] = input.get(constants.heightFour, constants.widthFour);
-        Imgproc.circle(input, new Point(constants.widthFour, constants.heightFour), 10, new Scalar(0, 0, 255, 0));
+        RGB[1] = input.get(constants.heightFour, constants.ringWidth);
+        Imgproc.circle(input, new Point(constants.ringWidth, constants.heightFour), 10, new Scalar(0, 0, 255, 0));
 
         //process ring values
         double sensitivity = 2.5;

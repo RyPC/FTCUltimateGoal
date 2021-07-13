@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Pipeline;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.firstinspires.ftc.teamcode.enums.Rings;
+import org.firstinspires.ftc.teamcode.enums.Side;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -26,9 +27,9 @@ public class Blue4Ring extends LinearOpMode {
     Constants constants = new Constants();
     Movement movement = new Movement(this, robotHardware, telemetry);
     OpenCvCamera backboardCamera;
+    OpenCvCamera ringCamera;
     int cameraMonitorViewId;
     int shooterPower = constants.shooterPower + 45;
-    RingCameraThread cameraThread;
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -39,7 +40,37 @@ public class Blue4Ring extends LinearOpMode {
         telemetry.update();
 
         cameraMonitorViewId = robotHardware.hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robotHardware.hwMap.appContext.getPackageName());
-        backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam);
+
+        //set up ring camera
+        ringCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.ringWebcam);
+
+        Pipeline ringPipeline = new Pipeline(Color.BLUE, Side.LEFT);
+        ringCamera.setPipeline(ringPipeline);
+
+        ringCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                ringCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.UPSIDE_DOWN);
+            }
+        });
+
+
+        telemetry.addLine("Ready for Start");
+        telemetry.update();
+
+        Rings position = Rings.FOUR;
+        while (!isStarted() && !isStopRequested()) {
+            position = ringPipeline.getPosition();
+            telemetry.addData("Position", position);
+            telemetry.update();
+        }
+
+        ringCamera.setPipeline(null);
+        ringCamera.stopStreaming();
+        ringCamera.closeCameraDevice();
+        ringCamera = null;
+
+        backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam, cameraMonitorViewId);
 
         BackboardPipeline pipeline = new BackboardPipeline(Color.BLUE);
         backboardCamera.setPipeline(pipeline);
@@ -50,22 +81,6 @@ public class Blue4Ring extends LinearOpMode {
                 backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
-
-        //start ring camera thread
-        cameraThread = new RingCameraThread(this, telemetry, Color.BLUE);
-        cameraThread.start();
-
-
-        telemetry.addLine("Ready for Start");
-        telemetry.update();
-
-//        Rings position;
-//        while (!isStarted() && !isStopRequested()) {
-//            position = cameraThread.getPosition();
-//            telemetry.addData("Position", position);
-//            telemetry.update();
-//        }
-        waitForStart();
 
 
         ElapsedTime elapsedTime = new ElapsedTime();
@@ -89,12 +104,32 @@ public class Blue4Ring extends LinearOpMode {
                 case 0:
                     //wobble goal
                     robotHardware.shooter.setVelocity(shooterPower);
-                    robotHardware.drivePower(109, 1);
-                    robotHardware.turnTo(90);
-                    robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                    robotHardware.wobbleArm.setPosition(constants.armUp);
-                    robotHardware.strafePower(-60, -0.75);
-                    robotHardware.turnTo(0);
+                    switch (position) {
+                        case ZERO:
+                            robotHardware.turnTo(0);
+                            robotHardware.drivePower(55, 1);
+                            robotHardware.turnTo(90);
+                            robotHardware.wobbleClamp.setPosition(constants.clampOpen);
+                            robotHardware.wobbleArm.setPosition(constants.armUp);
+                            robotHardware.strafePower(-12, -0.75);
+                            break;
+                        case ONE:
+                            robotHardware.drivePower(95, 1);
+                            robotHardware.strafePower(5, 1);
+                            robotHardware.placeWobble();
+                            robotHardware.strafePower(-5, -1);
+                            robotHardware.drivePower(-30, -1);
+                            break;
+                        case FOUR:
+                            robotHardware.drivePower(109, 1);
+                            robotHardware.turnTo(90);
+                            robotHardware.wobbleClamp.setPosition(constants.clampOpen);
+                            robotHardware.wobbleArm.setPosition(constants.armUp);
+                            robotHardware.strafePower(-60, -0.75);
+                            break;
+                    }
+                    robotHardware.turnTo(-10);
+                    //make a permanent change to the angle to be at 20 degrees
                     robotHardware.angleAdjustment = 20;
                     stage++;
                     break;
@@ -103,16 +138,32 @@ public class Blue4Ring extends LinearOpMode {
                 case 7:
                     //shoot
                     if (robotHardware.blocker.getPosition() != constants.blockerUp)
-                        movement.goToPoint(127, 132, pipeline);
+                        movement.goToPoint(127, 132, pipeline, 0.75);
                     if (movement.closeTo(127, 132, 10, pipeline)) {
                         movement.shoot(shooterPower);
                         robotHardware.intakeOn();
                     }
                     if (elapsedTime.milliseconds() > 3000) {
-                        stage++;
+                        if (stage == 1) {
+                            switch (position) {
+                                case ZERO:
+                                    stage = 100;
+                                    break;
+                                case ONE:
+                                    stage = 4;
+                                case FOUR:
+                                    stage++;
+                                    break;
+                            }
+                        }
+                        else {
+                            stage++;
+                        }
+
                         movement.block();
                     }
                     robotHardware.shooter.setVelocity(shooterPower);
+
                     break;
                 case 2:
                 case 5:
@@ -127,7 +178,7 @@ public class Blue4Ring extends LinearOpMode {
                     //eat stack(yum!)
                     robotHardware.intakeOn();
                     robotHardware.turnTo(-70);
-                    robotHardware.drivePower((stage == 3 ? 18 : 24), 0.25, -70);
+                    robotHardware.drivePower((stage == 3 ? 18 : 24), 0.20, -70);
                     robotHardware.drivePower(-4, -1, -70);
                     robotHardware.intakeOn();
                     movement.block();

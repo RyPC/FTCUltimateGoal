@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Pipeline;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.firstinspires.ftc.teamcode.enums.Rings;
+import org.firstinspires.ftc.teamcode.enums.Side;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
@@ -30,7 +31,7 @@ public class RedInnerStack extends LinearOpMode {
         telemetry.addLine("Setting up camera...");
         telemetry.update();
 
-        Pipeline pipeline = new Pipeline(Color.RED);
+        Pipeline pipeline = new Pipeline(Color.RED, Side.LEFT);
         robotHardware.backboardCamera.setPipeline(pipeline);
 
         robotHardware.backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {

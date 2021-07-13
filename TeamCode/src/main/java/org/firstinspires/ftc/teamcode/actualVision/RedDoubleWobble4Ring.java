@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Pipeline;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.firstinspires.ftc.teamcode.enums.Rings;
+import org.firstinspires.ftc.teamcode.enums.Side;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -27,6 +28,8 @@ public class RedDoubleWobble4Ring extends LinearOpMode {
     Constants constants = new Constants();
     Movement movement = new Movement(this, robotHardware, telemetry);
     OpenCvCamera backboardCamera;
+    OpenCvCamera ringCamera;
+    int cameraMonitorViewId;
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -36,39 +39,49 @@ public class RedDoubleWobble4Ring extends LinearOpMode {
         telemetry.addLine("Setting up camera...");
         telemetry.update();
 
-        backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam);
+        cameraMonitorViewId = robotHardware.hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robotHardware.hwMap.appContext.getPackageName());
 
-        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
+        //set up ring camera
+        ringCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.ringWebcam);
 
+        Pipeline ringPipeline = new Pipeline(Color.BLUE, Side.LEFT);
+        ringCamera.setPipeline(ringPipeline);
+
+        ringCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                ringCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.UPSIDE_DOWN);
+            }
+        });
+
+
+        telemetry.addLine("Ready for Start");
+        telemetry.update();
+
+        Rings position = Rings.FOUR;
+        while (!isStarted() && !isStopRequested()) {
+            position = ringPipeline.getPosition();
+            telemetry.addData("Position", position);
+            telemetry.update();
+        }
+
+        ringCamera.setPipeline(null);
+        ringCamera.stopStreaming();
+        ringCamera.closeCameraDevice();
+        ringCamera = null;
+
+        backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam, cameraMonitorViewId);
+
+        BackboardPipeline pipeline = new BackboardPipeline(Color.BLUE);
         backboardCamera.setPipeline(pipeline);
 
         backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.UPSIDE_DOWN);
+                backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
-        telemetry.addLine("Ready for Start");
-        telemetry.update();
 
-        Rings position;
-        while (!isStarted() && !isStopRequested()) {
-            if (pipeline.detected()) {
-                movement.block();
-                telemetry.addLine("Pos: [" + pipeline.getX() + ", " + pipeline.getY() + "]");
-
-                int[] left = pipeline.getLeft();
-                telemetry.addLine("Left: [" + left[0] + ", " + left[1] + "]");
-                int[] right = pipeline.getRight();
-                telemetry.addLine("Right: [" + right[0] + ", " + right[1] + "]");
-                telemetry.addLine("Size: [" + pipeline.getWidth() + ", " + pipeline.getHeight() + "]");
-                telemetry.addLine("RGB");
-                telemetry.addData("Left", Arrays.toString(pipeline.getRGBLeft()));
-                telemetry.addData("Right", Arrays.toString(pipeline.getRGBRight()));
-            }
-            telemetry.update();
-
-        }
 
         ElapsedTime elapsedTime = new ElapsedTime();
         ElapsedTime totalTime = new ElapsedTime();

@@ -31,10 +31,8 @@ public class Constants {
     public final int cameraWidth = 320;
     public final int cameraHeight = 240;
     //ring positions
-    public int heightOne = 195;
-    public int heightFour = 165;
-    //distance from left to center of ring
-    public final int ringWidth = 120;
-    public final int widthOne = ringWidth;
-    public final int widthFour = ringWidth;
+    public int heightOne = 203;
+    public int heightFour = 173;
+    //distance from left side of img to center of ring
+    public int ringWidth = 80;
 }
