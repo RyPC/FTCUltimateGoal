@@ -618,15 +618,15 @@ public class RobotHardware {
         wobbleClamp.setPosition(constants.clampClosed);
     }
 
-    public void intake(boolean on) {
-        intake.setPower(on ? 1 : 0);
-        cleanser.setPower(on ? 1 : 0);
+    public void intake(double power) {
+        intake.setPower(power);
+        cleanser.setPower(power);
     }
     public void intakeOn() {
-        intake(true);
+        intake(1);
     }
     public void intakeOff() {
-        intake(false);
+        intake(0);
     }
 
     public void eggsDown() {

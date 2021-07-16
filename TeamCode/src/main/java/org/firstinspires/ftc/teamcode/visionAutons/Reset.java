@@ -17,7 +17,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.Arrays;
 
 @Disabled
-@Autonomous(name = "Reset", group = "Vision")
+@Autonomous(name = "Reset", group = "Move")
 public class Reset extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);

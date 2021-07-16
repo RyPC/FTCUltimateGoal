@@ -12,17 +12,19 @@ import org.firstinspires.ftc.teamcode.Movement;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.Arrays;
 
-@Disabled
-@Autonomous(name = "Odo", group = "Vision")
+//@Disabled
+@Autonomous(name = "Odo", group = "Move")
 public class OdoThign extends LinearOpMode {
-
+    
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
     Movement movement = new Movement(this, robotHardware, telemetry);
+    OpenCvCamera camera;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -32,13 +34,14 @@ public class OdoThign extends LinearOpMode {
         telemetry.addLine("Setting up camera...");
         telemetry.update();
 
-        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
-        robotHardware.backboardCamera.setPipeline(pipeline);
+        BackboardPipeline pipeline = new BackboardPipeline(Color.BLUE);
+        camera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam);
+        camera.setPipeline(pipeline);
 
-        robotHardware.backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
+                camera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
         telemetry.addLine("Ready for Start");
@@ -56,7 +59,7 @@ public class OdoThign extends LinearOpMode {
                 telemetry.addLine("RGB");
                 telemetry.addData("Left", Arrays.toString(pipeline.getRGBLeft()));
                 telemetry.addData("Right", Arrays.toString(pipeline.getRGBRight()));
-                telemetry.addData("angle", pipeline.getAngle());
+                telemetry.addData("Angle", pipeline.getAngle());
                 telemetry.update();
 
             }

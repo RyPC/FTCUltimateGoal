@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.TeleOpControls;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.Arrays;
@@ -20,6 +21,8 @@ public class CameraTestBlue extends LinearOpMode {
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     TeleOpControls teleOpControls = new TeleOpControls(this, robotHardware, telemetry);
     Constants constants = new Constants();
+    int cameraMonitorViewId;
+    OpenCvCamera camera;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -28,13 +31,17 @@ public class CameraTestBlue extends LinearOpMode {
         telemetry.addLine("Setting up camera...");
         telemetry.update();
 
-        BackboardPipeline pipeline = new BackboardPipeline(Color.BLUE);
-        robotHardware.backboardCamera.setPipeline(pipeline);
+        cameraMonitorViewId = robotHardware.hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robotHardware.hwMap.appContext.getPackageName());
 
-        robotHardware.backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        BackboardPipeline pipeline = new BackboardPipeline(Color.BLUE);
+        camera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam);
+
+        camera.setPipeline(pipeline);
+
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
+                camera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
 

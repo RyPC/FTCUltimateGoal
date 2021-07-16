@@ -11,8 +11,8 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-@TeleOp(name = "pooMode", group = "TeleOp")
-public class Teleop extends LinearOpMode {
+@TeleOp(name = "blooMode", group = "TeleOp")
+public class BlueTeleop extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     TeleOpControls teleOpControls = new TeleOpControls(this, robotHardware, telemetry);
@@ -29,7 +29,7 @@ public class Teleop extends LinearOpMode {
         telemetry.addLine("Starting Camera...");
         telemetry.update();
 
-        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
+        BackboardPipeline pipeline = new BackboardPipeline(Color.BLUE);
         backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam);
         backboardCamera.setPipeline(pipeline);
 

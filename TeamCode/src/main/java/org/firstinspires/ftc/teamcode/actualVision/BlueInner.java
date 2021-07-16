@@ -17,11 +17,8 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-import java.nio.channels.Pipe;
-import java.util.Arrays;
-
-@Autonomous(name = "Red 4 Ring", group = "Vision")
-public class Red4Ring extends LinearOpMode {
+@Autonomous(name = "Blue Inner", group = "Vision")
+public class BlueInner extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
@@ -29,12 +26,12 @@ public class Red4Ring extends LinearOpMode {
     OpenCvCamera backboardCamera;
     OpenCvCamera ringCamera;
     int cameraMonitorViewId;
+    int shooterPower = constants.shooterPower + 45;
     @Override
 
     public void runOpMode() throws InterruptedException {
 
         robotHardware.init(hardwareMap, true);
-
 
         telemetry.addLine("Setting up camera...");
         telemetry.update();
@@ -44,7 +41,7 @@ public class Red4Ring extends LinearOpMode {
         //set up ring camera
         ringCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.ringWebcam);
 
-        Pipeline ringPipeline = new Pipeline(Color.BLUE, Side.LEFT);
+        Pipeline ringPipeline = new Pipeline(Color.BLUE, Side.RIGHT);
         ringCamera.setPipeline(ringPipeline);
 
         ringCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
@@ -53,6 +50,7 @@ public class Red4Ring extends LinearOpMode {
                 ringCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.UPSIDE_DOWN);
             }
         });
+
 
         telemetry.addLine("Ready for Start");
         telemetry.update();
@@ -90,11 +88,11 @@ public class Red4Ring extends LinearOpMode {
         int stage = 0;
         int prevStage = -1;
 
-        robotHardware.shooter.setVelocity(constants.shooterPower);
+        shooterPower = 1340 - 220;
+        robotHardware.shooter.setVelocity(shooterPower);
         while(opModeIsActive() && !isStopRequested()) {
             movement.resetPower();
 
-            //reset timer when stage changes
             if (stage != prevStage) {
                 elapsedTime.reset();
                 prevStage = (int)stage;
@@ -102,21 +100,80 @@ public class Red4Ring extends LinearOpMode {
 
             switch (stage) {
                 case 0:
-                    //wobble goal
-                    robotHardware.shooter.setVelocity(constants.shooterPower);
-                    robotHardware.drivePower(113, 1);
-                    robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                    robotHardware.strafePower(4, 1);
-                    robotHardware.strafePower(-11, -1);
-                    robotHardware.drivePower(-38, -0.9);
-                    robotHardware.wobbleClamp.setPosition(constants.clampClosed);
-                    robotHardware.sleep(250);
-                    stage++;
+                    //move to shooter position(100, 120)
+                    //wait to charge shooter?
+                    robotHardware.shooter.setVelocity(shooterPower);
+                    movement.goToPoint(100, 135, pipeline);
+                    if (elapsedTime.milliseconds() > 5500) {
+                        stage++;
+                    }
                     break;
                 case 1:
+                    //shoot initial three rings at below angles
+                    int[] angles = {-6, -13, -20};
+                    int[] times = {600, 400, 1100};
+                    robotHardware.intakeOff();
+                    robotHardware.blocker.setPosition(constants.blockerUp);
+                    for (int i = 0; i < 3; i++) {
+                        shooterPower = 1340 - 200;
+                        robotHardware.shooter.setVelocity(shooterPower);
+                        robotHardware.turnTo(angles[i], 0.15);
+                        robotHardware.intake(0.25);
+                        robotHardware.sleep(times[i]);
+                        robotHardware.intakeOff();
+                    }
+                    robotHardware.turnTo(0);
+                    stage++;
+                    break;
+                case 2:
+                    //deposit wobble goal
+                    shooterPower = 1340  + 45;
+                    robotHardware.shooter.setVelocity(shooterPower);
+                    robotHardware.drivePower(2, 0.75);
+                    switch (position) {
+                        case ZERO:
+                            robotHardware.strafePower(-30, -0.75);
+                            robotHardware.turnTo(180);
+                            robotHardware.placeWobble();
+                            robotHardware.turnTo(0);
+                            robotHardware.strafePower(24, 1);
+                            break;
+                        case ONE:
+                            robotHardware.drivePower(36, 0.75);
+                            robotHardware.turnTo(180);
+                            robotHardware.placeWobble();
+                            robotHardware.turnTo(0);
+                            break;
+                        case FOUR:
+                            robotHardware.drivePower(60, 0.75);
+                            robotHardware.strafePower(-24, -0.75);
+                            robotHardware.turnTo(45);
+                            robotHardware.drivePower(-30, -0.75);
+                            break;
+                    }
+                    stage++;
+                    break;
+                case 3:
+                    movement.goToPoint(108, 78, pipeline);
+                    if (elapsedTime.milliseconds() > 5000) {
+                        stage++;
+                    }
+                    break;
+                case 4:
+                    //collect bouncebacks
+                    //go to position within vision
+                    //robotHardware.drivePower(y, 0.75);
+                    //robotHardware.turnTo(-90);
+                    //robotHardware.intakeOn();
+                    //robotHardware.drivePower(x, 0.5);
+                    //robotHardware.drivePower(-x, -1);
+                    //robotHardware.turnTo(0);
+                    //robotHardware.drivePower(-y, -1);
+                    stage++;
+                    break;
                 case 5:
-                case 8:
-                    //shoot
+                    //move to shooter position(135, 120)
+                    //shoot (up to) three rings into high goal(0 degrees/straight)
                     if (robotHardware.blocker.getPosition() != constants.blockerUp)
                         movement.goToPoint(135, 120, pipeline);
                     if (movement.closeTo(135, 120, 15, pipeline)) {
@@ -129,49 +186,21 @@ public class Red4Ring extends LinearOpMode {
                     }
                     robotHardware.shooter.setVelocity(constants.shooterPower);
                     break;
-                case 2:
-                    //back up from wobble goal
-                    robotHardware.strafePower(10, 1);
-                    stage++;
-                    break;
-                case 3:
-                    //line up for rings
-                    movement.block();
-                    movement.goToPoint(94, 168, pipeline);
-                    if (elapsedTime.milliseconds() > 2000)
-                        stage++;
-                    break;
-                case 6:
-                    //go to collect stack position
-                    movement.block();
-                    movement.goToPoint(121, 168, pipeline);
-                    if (elapsedTime.milliseconds() > 2000)
-                        stage++;
-                    break;
-                case 4:
-                case 7:
-                    //collect stack
-                    robotHardware.intakeOn();
-                    robotHardware.turnTo(90);
-                    robotHardware.drivePower(14, 0.25, 90);
-//                    robotHardware.intake.setPower(-0.75);
-                    robotHardware.drivePower(-4, -1, 90);
-                    robotHardware.intakeOn();
-                    movement.block();
-                    stage++;
-                    break;
                 case 100:
-                    //pp-pp-pparkkk
+                    //wait back?
+                    //park on line
+                        //farther right if in A position
                     robotHardware.intakeOff();
-                    movement.goToPoint(153, 90, pipeline);
-                    break;
-                default:
-                    stage++;
-                    break;
+                    if (totalTime.milliseconds() < 25000) {
+//                        movement.goToPoint());
+                    }
+                    else {
+                        movement.goToPoint(153, 90, pipeline);
+                    }
             }
 
-            if (totalTime.milliseconds() > 29000)
-                stage = 10;
+            if (totalTime.milliseconds() > 28500)
+                stage = 100;
             movement.setPowers();
             telemetry.addData("Stage", stage);
             telemetry.addData("Detected", pipeline.detected());
@@ -180,8 +209,8 @@ public class Red4Ring extends LinearOpMode {
 //            telemetry.addLine("Left: [" + left[0] + ", " + left[1] + "]");
 //            int[] right = pipeline.getLeft();
 //            telemetry.addLine("Right: [" + right[0] + ", " + right[1] + "]");
-//            telemetry.addLine("Pos: [" + pipeline.getX() + ", " + pipeline.getY() + "]");
-            telemetry.addData("time", totalTime.milliseconds());
+            telemetry.addLine("Pos: [" + pipeline.getX() + ", " + pipeline.getY() + "]");
+//            telemetry.addData("time", totalTime.milliseconds());
 //            telemetry.addLine("RGB");
 //            telemetry.addData("Right", Arrays.toString(pipeline.getRight()));
 //            telemetry.addData("Left", Arrays.toString(pipeline.getLeft()));

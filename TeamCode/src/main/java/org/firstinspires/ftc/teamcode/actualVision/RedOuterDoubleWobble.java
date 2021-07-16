@@ -21,8 +21,8 @@ import org.openftc.easyopencv.OpenCvViewport;
 
 import java.util.Arrays;
 
-@Autonomous(name = "Red 4 Ring Double Wobble", group = "Vision")
-public class RedDoubleWobble4Ring extends LinearOpMode {
+@Autonomous(name = "Red Outer Double Wobble", group = "Vision")
+public class RedOuterDoubleWobble extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();

@@ -12,10 +12,9 @@ public class Movement {
     Constants constants = new Constants();
 
     public double strafe = 0;
-    public int prevX, prevY;
     public double drive = 0;
     public double turn = 0;
-    public double is, id;
+    public double ix, iy, dx, dy, prevX, prevY = 0;
 
     public Movement(LinearOpMode op, RobotHardware robotHardware, Telemetry telemetry) {
         this.op = op;
@@ -24,8 +23,11 @@ public class Movement {
     }
 
     public void setPowers() {
+        setPowers(constants.shooterPower);
+    }
+    public void setPowers(double shooterPower) {
         //+ = forward, right, ccw
-        robotHardware.shooter.setVelocity(constants.shooterPower);
+        robotHardware.shooter.setVelocity(shooterPower);
         robotHardware.fr.setPower(drive - strafe + turn);
         robotHardware.fl.setPower(drive + strafe - turn);
         robotHardware.br.setPower(drive + strafe + turn);
@@ -53,15 +55,41 @@ public class Movement {
     }
 
     public void goToPoint(int x, int y, int currentX, int currentY, BackboardPipeline pipeline, double power1, double power2) {
-        //PI controller go to point
-        double diffs = currentX - x;
-        double diffd = currentY - y;
-        double ps = diffs / 80.0;
-        double pd = diffd / 80.0;
-        is = ((closeTo(x, currentY, 15, pipeline) && !closeTo(x, currentY, 0, pipeline)) ? is + diffd : 0) / 90;
-        id = ((closeTo(currentX, y, 15, pipeline) && !closeTo(currentX, y, 0, pipeline)) ? id + diffs : 0) / 90;
-        strafe = ps;
-        drive = pd;
+        //PID controller go to point
+
+        //constants
+        double kp = 1 / 80.0;
+        double ki = 1 / 5000.0;
+        double kd = 1 / 400.0;
+
+        //proportional(delta x/y)
+        double deltaX = currentX - x;
+        double deltaY = currentY - y;
+        //proportional power value
+        double px = deltaX * kp;
+        double py = deltaY * kp;
+
+        //integral controller if within 20 units from intended spot
+        if (deltaX > 15)
+            ix = 0;
+        else
+            ix+= deltaX * ki;
+        if (deltaY > 15)
+            iy = 0;
+        else
+            iy+= deltaY * ki;
+
+        //derivative controller
+        dx = (x - prevX) * kd;
+        dy = (y - prevY) * kd;
+        prevX = currentX;
+        prevY = currentY;
+
+        //set powers
+//        strafe = px + ix - dx;
+//        drive = py + iy - dy;
+        strafe = px + dx;
+        drive = py + dy;
         strafe*= power2;
         drive*= power1;
     }
@@ -70,8 +98,6 @@ public class Movement {
             turnTo(0);
         }
         if (pipeline.detected()) {
-            prevX = pipeline.getX();
-            prevY = pipeline.getY();
             goToPoint(x, y, pipeline.getX(), pipeline.getY(), pipeline, power1, power2);
         }
 //        else

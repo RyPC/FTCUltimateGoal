@@ -104,7 +104,7 @@ public class TeleOpControls {
             bDown = false;
         }
 
-        shooterSpeed = bPressed ? constants.shooterPower - 100: constants.shooterPower;
+        shooterSpeed = bPressed ? constants.shooterPower - 180: constants.shooterPower;
 
         //changing angle with dpad right/left
         if (op.gamepad1.dpad_right && !dPRDown) {
