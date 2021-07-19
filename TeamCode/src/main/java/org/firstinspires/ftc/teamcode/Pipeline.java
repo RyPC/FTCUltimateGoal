@@ -27,6 +27,9 @@ public class Pipeline  extends OpenCvPipeline {
         if (side == Side.LEFT) {
             constants.ringWidth = 310;
         }
+        else if (side == Side.RIGHT) {
+            constants.ringWidth = 10;
+        }
     }
 
 

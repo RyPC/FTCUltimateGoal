@@ -140,6 +140,9 @@ public class Movement {
     public boolean closeTo(int x, int y, BackboardPipeline pipeline) {
         return closeTo(x, y, 25, pipeline);
     }
+    public boolean angleCloseTo(double angle) {
+        return (Math.abs(robotHardware.getAngle()) < angle);
+    }
     public double speed() {
         return Math.abs(drive) + Math.abs(turn) + Math.abs(strafe);
     }

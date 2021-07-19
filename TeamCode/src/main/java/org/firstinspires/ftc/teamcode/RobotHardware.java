@@ -653,6 +653,11 @@ public class RobotHardware {
         this.pastVelocity = currentVelocity;
     }
 
+    //returns absolute value of 4 motor powers
+    public double getPowers() {
+        return Math.abs(fr.getPower()) + Math.abs(fl.getPower()) + Math.abs(br.getPower()) + Math.abs(bl.getPower());
+    }
+
 }
 
 
