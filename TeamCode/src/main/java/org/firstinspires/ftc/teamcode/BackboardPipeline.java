@@ -35,6 +35,7 @@ public class BackboardPipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
 
+        //testing different vision processes
 //        Imgproc.cvtColor(input, hsv, Imgproc.COLOR_RGB2HSV);
 //        Core.inRange(hsv, new Scalar(0, 100, 100), new Scalar(15, 255, 255), redMat);
 //        Mat lines = new Mat();
@@ -102,10 +103,10 @@ public class BackboardPipeline extends OpenCvPipeline {
         return input;
     }
     public boolean checkRed(double[] rgb) {
-        return rgb[0] > (rgb[1] + rgb[2]) * 0.8 && rgb[1] + rgb[2] < 280 && rgb[0] > 100;
+        return rgb[0] > (rgb[1] + rgb[2]) * 0.75 && rgb[0] > 170;
     }
     public boolean checkBlue(double[] rgb) {
-        return rgb[2] > (rgb[0] + rgb[1]) * 0.7 && rgb[0] + rgb[1] < 300 && rgb[2] > 100;
+        return rgb[2] > (rgb[0] + rgb[1]) * 0.7 && rgb[2] > 150;
     }
 
     public int getX() {
@@ -140,6 +141,6 @@ public class BackboardPipeline extends OpenCvPipeline {
     }
 
     public boolean detected() {
-        return (right[0] + left[0] + right[1] + left[1] != 0) && (color == Color.RED ? checkRed(getRGB()) : checkBlue(getRGB())) && getWidth() > 10;
+        return (right[0] + left[0] + right[1] + left[1] != 0) && getWidth() > 10 /*&& (color == Color.RED ? checkRed(getRGB()) : checkBlue(getRGB()))*/;
     }
 }

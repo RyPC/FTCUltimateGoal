@@ -59,7 +59,7 @@ public class Movement {
 
         //constants
         double kp = 1 / 80.0;
-        double ki = 1 / 5000.0;
+        double ki = 1 / 2000000.0;
         double kd = 1 / 400.0;
 
         //proportional(delta x/y)
@@ -70,11 +70,12 @@ public class Movement {
         double py = deltaY * kp;
 
         //integral controller if within 20 units from intended spot
-        if (deltaX > 15)
+        if (deltaX > 50 || deltaX <= 6)
             ix = 0;
         else
             ix+= deltaX * ki;
-        if (deltaY > 15)
+
+        if (deltaY > 50 || deltaY <= 6)
             iy = 0;
         else
             iy+= deltaY * ki;
@@ -100,30 +101,31 @@ public class Movement {
         if (pipeline.detected()) {
             goToPoint(x, y, pipeline.getX(), pipeline.getY(), pipeline, power1, power2);
         }
-//        else
-//            goToPoint(x, y, prevX, prevY, pipeline, straight);
     }
     public void goToPoint(int x, int y, BackboardPipeline pipeline) {
         goToPoint(x, y, pipeline, 1);
     }
     public void goToPoint(int x, int y, BackboardPipeline pipeline, double power) {
-        goToPoint(x, y, pipeline, true, power, power);
+        goToPoint(x, y, pipeline, true, power, power / 0.8);
     }
     public void goToPoint(int x, int y, BackboardPipeline pipeline, double power1, double power2) {
         goToPoint(x, y, pipeline, true, power1, power2);
     }
-    public void shoot(int velocity) {
+    public void shoot(int velocity, double power) {
         robotHardware.shooter.setVelocity(velocity);
 
         if (Math.abs(robotHardware.shooter.getVelocity() - velocity) < 200) {
             robotHardware.blocker.setPosition(constants.blockerUp);
-            robotHardware.intake.setPower(0.5);
-            robotHardware.cleanser.setPower(0.5);
+            robotHardware.intake.setPower(1);
+            robotHardware.cleanser.setPower(power);
         }
         else {
             robotHardware.intake.setPower(0);
             robotHardware.cleanser.setPower(0);
         }
+    }
+    public void shoot(int velocity) {
+        shoot(velocity, 1);
     }
     public void shoot() {
         shoot(constants.shooterPower);
@@ -148,7 +150,10 @@ public class Movement {
     }
 
     public void block() {
-        robotHardware.blocker.setPosition(constants.blockerDown);
+        block(true);
+    }
+    public void block(boolean down) {
+        robotHardware.blocker.setPosition(down ? constants.blockerDown : constants.blockerUp);
     }
 
 

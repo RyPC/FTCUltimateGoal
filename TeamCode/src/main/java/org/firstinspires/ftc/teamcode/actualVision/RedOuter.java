@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.actualVision;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -20,6 +21,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.nio.channels.Pipe;
 import java.util.Arrays;
 
+@Disabled
 @Autonomous(name = "Red Outer", group = "Vision")
 public class RedOuter extends LinearOpMode {
 
@@ -29,6 +31,7 @@ public class RedOuter extends LinearOpMode {
     OpenCvCamera backboardCamera;
     OpenCvCamera ringCamera;
     int cameraMonitorViewId;
+    int shooterPower = constants.shooterPower - 110;
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -44,7 +47,7 @@ public class RedOuter extends LinearOpMode {
         //set up ring camera
         ringCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.ringWebcam);
 
-        Pipeline ringPipeline = new Pipeline(Color.BLUE, Side.LEFT);
+        Pipeline ringPipeline = new Pipeline(Color.RED, Side.RIGHT);
         ringCamera.setPipeline(ringPipeline);
 
         ringCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
@@ -71,7 +74,7 @@ public class RedOuter extends LinearOpMode {
 
         backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam, cameraMonitorViewId);
 
-        BackboardPipeline pipeline = new BackboardPipeline(Color.BLUE);
+        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
         backboardCamera.setPipeline(pipeline);
 
         backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
@@ -90,7 +93,7 @@ public class RedOuter extends LinearOpMode {
         int stage = 0;
         int prevStage = -1;
 
-        robotHardware.shooter.setVelocity(constants.shooterPower);
+        robotHardware.shooter.setVelocity(shooterPower);
         while(opModeIsActive() && !isStopRequested()) {
             movement.resetPower();
 
@@ -103,31 +106,57 @@ public class RedOuter extends LinearOpMode {
             switch (stage) {
                 case 0:
                     //wobble goal
-                    robotHardware.shooter.setVelocity(constants.shooterPower);
-                    robotHardware.drivePower(113, 1);
-                    robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                    robotHardware.strafePower(4, 1);
-                    robotHardware.strafePower(-11, -1);
-                    robotHardware.drivePower(-38, -0.9);
-                    robotHardware.wobbleClamp.setPosition(constants.clampClosed);
-                    robotHardware.sleep(250);
-                    stage++;
+                    robotHardware.shooter.setVelocity(shooterPower);
+                    switch(position) {
+                        case ZERO:
+                            robotHardware.drivePower(68, 1);
+                            robotHardware.placeWobble();
+                            robotHardware.strafePower(-11, -1);
+                            robotHardware.drivePower(-10, -1);
+                            robotHardware.sleep(5000);
+                            stage = 8;
+                            break;
+                        case ONE:
+                            robotHardware.drivePower(86, 1);
+                            robotHardware.turnTo(180);
+                            robotHardware.strafePower(4, 1);
+                            robotHardware.placeWobble();
+                            robotHardware.strafePower(-11, -1);
+                            robotHardware.turnTo(0);
+                            robotHardware.drivePower(-40, -0.75);
+                            robotHardware.sleep(500);
+                            stage++;
+                            break;
+                        case FOUR:
+                            robotHardware.shooter.setVelocity(shooterPower);
+                            robotHardware.drivePower(113, 1);
+                            robotHardware.wobbleClamp.setPosition(constants.clampOpen);
+                            robotHardware.strafePower(4, 1);
+                            robotHardware.strafePower(-11, -1);
+                            robotHardware.drivePower(-38, -0.9);
+                            robotHardware.wobbleClamp.setPosition(constants.clampClosed);
+                            robotHardware.sleep(250);
+                            stage++;
+                            break;
+                    }
                     break;
                 case 1:
                 case 5:
                 case 8:
                     //shoot
                     if (robotHardware.blocker.getPosition() != constants.blockerUp)
-                        movement.goToPoint(135, 120, pipeline);
-                    if (movement.closeTo(135, 120, 15, pipeline)) {
-                        movement.shoot();
-                        robotHardware.intakeOn();
+                        movement.goToPoint(124, 124, pipeline, 0.8);
+                    if (movement.closeTo(124, 124, 15, pipeline) && robotHardware.getPowers() < 1.25 && movement.angleCloseTo(2.5)) {
+                        movement.shoot(shooterPower, (position != Rings.FOUR) ? 0.25 : 0.5);
                     }
-                    if (elapsedTime.milliseconds() > 3500) {
-                        stage++;
+                    if (elapsedTime.milliseconds() > ((position == Rings.FOUR) ? 3000 : 6000)) {
+                        if (stage == 5 && position == Rings.ONE)
+                            stage = 100;
+                        else
+                            stage++;
                         movement.block();
                     }
-                    robotHardware.shooter.setVelocity(constants.shooterPower);
+                    robotHardware.shooter.setVelocity(shooterPower);
                     break;
                 case 2:
                     //back up from wobble goal
@@ -135,16 +164,18 @@ public class RedOuter extends LinearOpMode {
                     stage++;
                     break;
                 case 3:
-                    //line up for rings
+                    //line up for rings #1
                     movement.block();
-                    movement.goToPoint(94, 168, pipeline);
+                    robotHardware.intake(-1);
+                    movement.goToPoint(97, 176, pipeline);
                     if (elapsedTime.milliseconds() > 2000)
                         stage++;
                     break;
                 case 6:
-                    //go to collect stack position
+                    //line up for rings #2
                     movement.block();
-                    movement.goToPoint(121, 168, pipeline);
+                    robotHardware.intake(-1);
+                    movement.goToPoint(120, 176, pipeline);
                     if (elapsedTime.milliseconds() > 2000)
                         stage++;
                     break;
@@ -153,25 +184,41 @@ public class RedOuter extends LinearOpMode {
                     //collect stack
                     robotHardware.intakeOn();
                     robotHardware.turnTo(90);
-                    robotHardware.drivePower(14, 0.25, 90);
-//                    robotHardware.intake.setPower(-0.75);
-                    robotHardware.drivePower(-4, -1, 90);
+                    robotHardware.drivePower((position == Rings.ONE) ? 20 : 11, (stage == 4) ? 0.15 : 0.3, 90);
+                    robotHardware.sleep(250);
+                    if (stage == 4 && position == Rings.FOUR)
+                        robotHardware.intake.setPower(-0.5);
+                    robotHardware.drivePower(-4, -0.5, 90);
                     robotHardware.intakeOn();
                     movement.block();
+                    robotHardware.turnTo(15);
                     stage++;
                     break;
                 case 100:
                     //pp-pp-pparkkk
+                    robotHardware.shooter.setVelocity(0);
                     robotHardware.intakeOff();
-                    movement.goToPoint(153, 90, pipeline);
+                    if (totalTime.milliseconds() < 27500) {
+
+                        int x = (int) (Math.round((40.0 * Math.cos(totalTime.milliseconds()  * 2 * Math.PI / 3000)) / 10.0) * 10);
+                        int y = (int) (Math.round((20.0 * Math.sin(totalTime.milliseconds()  * 2 * Math.PI / 3000)) / 10.0) * 10);
+                        double pos = ((totalTime.milliseconds() / 333) % 2 == 0) ? constants.armDown : constants.armUp;
+
+                        robotHardware.wobbleArm.setPosition(pos);
+
+                        movement.goToPoint(131 + x, 174 + y, pipeline);
+                    }
+                    else {
+                        movement.goToPoint(153, 90, pipeline);
+                    }
                     break;
                 default:
                     stage++;
                     break;
             }
 
-            if (totalTime.milliseconds() > 29000)
-                stage = 10;
+            if (totalTime.milliseconds() > 27500)
+                stage = 100;
             movement.setPowers();
             telemetry.addData("Stage", stage);
             telemetry.addData("Detected", pipeline.detected());

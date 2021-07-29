@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.actualVision;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -18,12 +17,8 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-import java.nio.channels.Pipe;
-import java.util.Arrays;
-
-@Disabled
-@Autonomous(name = "Blue Outer", group = "Vision")
-public class BlueOuter extends LinearOpMode {
+@Autonomous(name = "Blue Outer No Stack", group = "Vision")
+public class BlueOuterNoStack extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
@@ -105,45 +100,51 @@ public class BlueOuter extends LinearOpMode {
             switch (stage) {
                 case 0:
                     //wobble goal
+                    robotHardware.shooter.setVelocity(0);
+                    robotHardware.sleep(7500);
                     robotHardware.shooter.setVelocity(shooterPower);
+                    robotHardware.sleep(2500);
                     switch (position) {
                         case ZERO:
                             robotHardware.turnTo(0);
-                            robotHardware.drivePower(53, 1);
+                            robotHardware.drivePower(55, 0.5);
                             robotHardware.turnTo(135);
-                            robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                            robotHardware.wobbleArm.setPosition(constants.armUp);
+                            robotHardware.placeWobble();
                             robotHardware.sleep(500);
                             robotHardware.strafePower(-12, -0.75);
                             robotHardware.turnTo(0);
                             robotHardware.shooter.setVelocity(shooterPower);
-                            robotHardware.sleep(4000);
                             break;
                         case ONE:
-                            robotHardware.drivePower(95, 1);
+                            robotHardware.strafePower(-5, -0.5);
+                            robotHardware.drivePower(95, 0.5);
                             robotHardware.placeWobble();
                             robotHardware.strafePower(-5, -1);
                             robotHardware.drivePower(-30, -1);
-                            robotHardware.sleep(4000);
                             break;
                         case FOUR:
-                            robotHardware.drivePower(104, 1);
-                            robotHardware.turnTo(135, 1.5);
-                            robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                            robotHardware.wobbleArm.setPosition(constants.armUp);
+                            robotHardware.drivePower(109, 0.5);
+                            robotHardware.turnTo(135, 0.75);
+                            robotHardware.placeWobble();
                             robotHardware.strafePower(-6, -1);
-                            robotHardware.turnTo(93);
+                            robotHardware.turnTo(90);
                             robotHardware.strafePower(-57, -1);
                             break;
                     }
                     //make a permanent change to the angle to be at 20 degrees
                     robotHardware.angleAdjustment = 20;
                     robotHardware.turnTo(0);
+                    robotHardware.sleep(500);
                     stage++;
                     break;
                 case 1:
-                case 4:
-                case 7:
+                    //go to shooter line
+                    movement.goToPoint(127, 132, pipeline, 0.8);
+                    if (elapsedTime.milliseconds() > 4500) {
+                        stage++;
+                    }
+                    break;
+                case 2:
                     //shoot
                     if (robotHardware.blocker.getPosition() != constants.blockerUp)
                         movement.goToPoint(127, 132, pipeline, 0.8);
@@ -172,24 +173,6 @@ public class BlueOuter extends LinearOpMode {
                     robotHardware.shooter.setVelocity(shooterPower);
 
                     break;
-                case 2:
-                case 5:
-                    //line up stack
-                    robotHardware.intake.setPower(-1);
-                    movement.goToPoint(100, 176, pipeline, 0.8);
-                    if (elapsedTime.milliseconds() > 2000)
-                        stage++;
-                    break;
-                case 3:
-                case 6:
-                    //eat stack(yum!)
-                    robotHardware.intakeOn();
-                    robotHardware.turnTo(-70);
-                    robotHardware.drivePower((stage == 3 ? 17 : 28), (stage == 3 ? 0.2 : 0.3), -70);
-                    robotHardware.drivePower(-4, -1, -70);
-                    movement.block();
-                    stage++;
-                    break;
                 case 100:
                     //pp-pp-pparkkk
                     robotHardware.intakeOff();
@@ -202,7 +185,7 @@ public class BlueOuter extends LinearOpMode {
                         int x = (int)(30.0 * Math.cos(totalTime.milliseconds()  * 2 * Math.PI / 3000));
                         int y = (int)(20.0 * Math.sin(totalTime.milliseconds()  * 2 * Math.PI / 3000));
 
-//                        robotHardware.wobbleArm.setPosition((((int)totalTime.seconds()) % 2  == 0) ? constants.armDown : constants.armUp);
+                        robotHardware.wobbleArm.setPosition((totalTime.seconds() % 2.0  == 0) ? constants.armDown : constants.armUp);
 
                         movement.goToPoint(75 + x, 186 + y, pipeline);
 

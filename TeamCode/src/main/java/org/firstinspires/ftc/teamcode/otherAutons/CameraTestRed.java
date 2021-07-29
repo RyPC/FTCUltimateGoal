@@ -9,7 +9,10 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.TeleOpControls;
 import org.firstinspires.ftc.teamcode.enums.Color;
 import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+
+import java.util.Arrays;
 
 @TeleOp(name = "camera test red", group = "TeleOp")
 //@Disabled
@@ -18,6 +21,8 @@ public class CameraTestRed extends LinearOpMode {
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     TeleOpControls teleOpControls = new TeleOpControls(this, robotHardware, telemetry);
     Constants constants = new Constants();
+    int cameraMonitorViewId;
+    OpenCvCamera camera;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -26,13 +31,17 @@ public class CameraTestRed extends LinearOpMode {
         telemetry.addLine("Setting up camera...");
         telemetry.update();
 
-        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
-        robotHardware.backboardCamera.setPipeline(pipeline);
+        cameraMonitorViewId = robotHardware.hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robotHardware.hwMap.appContext.getPackageName());
 
-        robotHardware.backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
+        camera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam);
+
+        camera.setPipeline(pipeline);
+
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                robotHardware.backboardCamera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
+                camera.startStreaming(constants.cameraWidth, constants.cameraHeight, OpenCvCameraRotation.SIDEWAYS_LEFT);
             }
         });
 
@@ -48,10 +57,13 @@ public class CameraTestRed extends LinearOpMode {
                 int[] right = pipeline.getRight();
                 telemetry.addLine("Right: [" + right[0] + ", " + right[1] + "]");
                 telemetry.addLine("Size: [" + pipeline.getWidth() + ", " + pipeline.getHeight() + "]");
-
+                telemetry.addLine("RGB: " + Arrays.toString(pipeline.getRGBLeft()));
             }
-            else
+            else {
                 telemetry.addLine("No backboard detected");
+                telemetry.addLine("RGB:" + Arrays.toString(pipeline.rgb));
+            }
+            telemetry.addData("imu", robotHardware.getAngle());
 
             telemetry.update();
         }

@@ -42,8 +42,6 @@ public class BlueTeleop extends LinearOpMode {
 
         telemetry.addLine("Ready for Start");
         while (!opModeIsActive() && !isStopRequested()) {
-            telemetry.addData("right", robotHardware.rightEgg.getPosition());
-            telemetry.addData("left", robotHardware.leftEgg.getPosition());
             telemetry.update();
             idle();
             sleep(50);
@@ -55,16 +53,14 @@ public class BlueTeleop extends LinearOpMode {
             teleOpControls.eggs1();
             if (this.gamepad1.y) {
                 movement.resetPower();
-                if (teleOpControls.bPressed) {
-                    robotHardware.blocker.setPosition(constants.blockerUp);
-                    movement.turn = 0.175;
-                    if (robotHardware.getAngle() > 3)
-                        robotHardware.intakeOn();
+                if (pipeline.detected() && movement.angleCloseTo(10)) {
+                    if (teleOpControls.bPressed)
+                        movement.goToPoint(199, 120, pipeline);
                     else
-                        robotHardware.intakeOff();
+                        movement.goToPoint(133, (int) (124 - (pipeline.getAngle() * 1.25)), pipeline);
                 }
                 else
-                    movement.goToPoint(133, 124, pipeline);
+                    movement.turnTo(0);
                 movement.setPowers();
             }
             else {
@@ -72,7 +68,8 @@ public class BlueTeleop extends LinearOpMode {
                 teleOpControls.noCheckBlocker();
             }
 
-            telemetry.addData("imu", robotHardware.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+            telemetry.addData("pipeline angle", pipeline.getAngle());
+            telemetry.addData("angle", robotHardware.getAngle());
             telemetry.addData("Mode", teleOpControls.getB() ? "low" : "high");
             telemetry.addData("Shooter Vel", robotHardware.shooter.getVelocity());
             telemetry.update();

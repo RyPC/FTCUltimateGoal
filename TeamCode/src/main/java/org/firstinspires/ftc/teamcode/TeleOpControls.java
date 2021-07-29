@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode;
-
+//LSErljaew;ljfs;jl [-[enise jaand the jafucking bitch
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -29,6 +29,8 @@ public class TeleOpControls {
     boolean eggPressed = false;
     boolean gateOpen = false;
     boolean aDown = false;
+    boolean xPressed = false;
+    boolean xDown = false;
     ElapsedTime shootTime = new ElapsedTime();
 
 
@@ -138,11 +140,20 @@ public class TeleOpControls {
         //movement
         //  left stick: strafing/movement
         //  triggers: rotation
-        //  Hold left stick slow mode: 30% speed
+        //  x toggle slow mode: 30% speed
+
+        if (op.gamepad1.x && !xDown) {
+            xDown = true;
+            xPressed = !xPressed;
+        }
+        else if (!op.gamepad1.x && xDown) {
+            xDown = false;
+        }
+
         double forward = -op.gamepad1.left_stick_y;
         double strafe = op.gamepad1.left_stick_x;
         double rotate = op.gamepad1.right_trigger - op.gamepad1.left_trigger;
-        double multiplier = (op.gamepad1.left_stick_button ? 0.3 : 1);
+        double multiplier = (xPressed ? 0.1 : 1);
 
         robotHardware.fr.setPower(multiplier * (forward - rotate - strafe));
         robotHardware.fl.setPower(multiplier * (forward + rotate + strafe));

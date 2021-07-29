@@ -58,12 +58,12 @@ public class CameraTestBlue extends LinearOpMode {
                 telemetry.addLine("Right: [" + right[0] + ", " + right[1] + "]");
                 telemetry.addLine("Size: [" + pipeline.getWidth() + ", " + pipeline.getHeight() + "]");
                 telemetry.addLine("RGB: " + Arrays.toString(pipeline.getRGBLeft()));
-
             }
             else {
                 telemetry.addLine("No backboard detected");
                 telemetry.addLine("RGB:" + Arrays.toString(pipeline.rgb));
             }
+            telemetry.addData("imu", robotHardware.getAngle());
 
             telemetry.update();
         }

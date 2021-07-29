@@ -6,7 +6,7 @@ public class Constants {
     public final double clampClosed = 0.225;
     public final double clampOpen = 0.55;
     public final double armDown = 0.9;
-    public final double armUp = 0.45;
+    public final double armUp = 0.44;
     public final double blockerDown = 0.35;
     public final double blockerUp = 0.23;
     public final double rightEggDown = 0;

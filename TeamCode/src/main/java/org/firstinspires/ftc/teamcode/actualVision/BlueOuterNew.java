@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.actualVision;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -18,12 +17,8 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-import java.nio.channels.Pipe;
-import java.util.Arrays;
-
-@Disabled
-@Autonomous(name = "Blue Outer", group = "Vision")
-public class BlueOuter extends LinearOpMode {
+@Autonomous(name = "New Blue Outer", group = "Vision")
+public class BlueOuterNew extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
@@ -31,7 +26,7 @@ public class BlueOuter extends LinearOpMode {
     OpenCvCamera backboardCamera;
     OpenCvCamera ringCamera;
     int cameraMonitorViewId;
-    int shooterPower = constants.shooterPower + 45;
+    int shooterPower = constants.shooterPower - 15;
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -109,7 +104,7 @@ public class BlueOuter extends LinearOpMode {
                     switch (position) {
                         case ZERO:
                             robotHardware.turnTo(0);
-                            robotHardware.drivePower(53, 1);
+                            robotHardware.drivePower(53, 1, false, 0, shooterPower);
                             robotHardware.turnTo(135);
                             robotHardware.wobbleClamp.setPosition(constants.clampOpen);
                             robotHardware.wobbleArm.setPosition(constants.armUp);
@@ -117,18 +112,16 @@ public class BlueOuter extends LinearOpMode {
                             robotHardware.strafePower(-12, -0.75);
                             robotHardware.turnTo(0);
                             robotHardware.shooter.setVelocity(shooterPower);
-                            robotHardware.sleep(4000);
                             break;
                         case ONE:
-                            robotHardware.drivePower(95, 1);
+                            robotHardware.drivePower(95, 1, false, 0, shooterPower);
                             robotHardware.placeWobble();
                             robotHardware.strafePower(-5, -1);
-                            robotHardware.drivePower(-30, -1);
-                            robotHardware.sleep(4000);
+                            robotHardware.drivePower(-30, -1, false, 0, shooterPower);
                             break;
                         case FOUR:
-                            robotHardware.drivePower(104, 1);
-                            robotHardware.turnTo(135, 1.5);
+                            robotHardware.drivePower(104, 1, false, 0, shooterPower);
+                            robotHardware.turnTo(155, 1.5);
                             robotHardware.wobbleClamp.setPosition(constants.clampOpen);
                             robotHardware.wobbleArm.setPosition(constants.armUp);
                             robotHardware.strafePower(-6, -1);
@@ -138,60 +131,74 @@ public class BlueOuter extends LinearOpMode {
                     }
                     //make a permanent change to the angle to be at 20 degrees
                     robotHardware.angleAdjustment = 20;
-                    robotHardware.turnTo(0);
+                    robotHardware.turnTo(0, 0.5);
                     stage++;
                     break;
                 case 1:
-                case 4:
-                case 7:
+                    movement.goToPoint(127, 132, pipeline);
+                    if (elapsedTime.milliseconds() > 3000) {
+                        stage++;
+                    }
+                    break;
+                case 2:
                     //shoot
                     if (robotHardware.blocker.getPosition() != constants.blockerUp)
                         movement.goToPoint(127, 132, pipeline, 0.8);
                     if (movement.closeTo(127, 132, 15, pipeline)) {
-                        movement.shoot(shooterPower, 0.25);
+                        movement.shoot(shooterPower, 0.5);
                     }
-                    if (elapsedTime.milliseconds() > (position == Rings.FOUR && stage != 7 ? 3000 : 5000)) {
-                        if (stage == 1) {
-                            switch (position) {
-                                case ZERO:
-                                    stage = 100;
-                                    break;
-                                case ONE:
-                                    stage = 4;
-                                case FOUR:
-                                    stage++;
-                                    break;
-                            }
+                    if (elapsedTime.milliseconds() > 3250) {
+                        if (position != Rings.ZERO) {
+                            stage++;
+                            shooterPower = constants.shooterPower;
                         }
                         else {
-                            stage++;
+                            stage = 100;
+                            shooterPower = 0;
                         }
-
+                        robotHardware.shooter.setVelocity(shooterPower);
+                        robotHardware.angleAdjustment = 10;
                         movement.block();
                     }
                     robotHardware.shooter.setVelocity(shooterPower);
-
-                    break;
-                case 2:
-                case 5:
-                    //line up stack
-                    robotHardware.intake.setPower(-1);
-                    movement.goToPoint(100, 176, pipeline, 0.8);
-                    if (elapsedTime.milliseconds() > 2000)
-                        stage++;
                     break;
                 case 3:
-                case 6:
-                    //eat stack(yum!)
-                    robotHardware.intakeOn();
-                    robotHardware.turnTo(-70);
-                    robotHardware.drivePower((stage == 3 ? 17 : 28), (stage == 3 ? 0.2 : 0.3), -70);
-                    robotHardware.drivePower(-4, -1, -70);
+                    //get closer to stack
+                    movement.goToPoint(154, 200, pipeline);
+                    if (elapsedTime.milliseconds() > 1000) {
+                        stage++;
+                    }
+                    break;
+                case 4:
+                    //line up behind stack
+                    movement.goToPoint(100, 192, pipeline);
+                    if (elapsedTime.milliseconds() > 3000) {
+                        stage++;
+                    }
+                    break;
+                case 5:
+                    //collect stack while shooting
+                    robotHardware.intake(1);
                     movement.block();
+                    robotHardware.drivePower(9, 0.1, false, 0, shooterPower);
+                    robotHardware.drivePower(-9, -0.2, false, 0, shooterPower);
+                    robotHardware.sleep(1500);
+                    robotHardware.blocker.setPosition(constants.blockerUp);
+                    robotHardware.cleanser.setPower(0.35);
+                    robotHardware.sleep(2500);
+                    robotHardware.blocker.setPosition(constants.blockerDown);
+                    shooterPower-= 50;
+                    robotHardware.shooter.setVelocity(shooterPower);
+                    robotHardware.drivePower(12, 0.25, false, 0, shooterPower);
+                    robotHardware.sleep(2000);
+                    robotHardware.turnTo(4, 0.5);
+                    robotHardware.blocker.setPosition(constants.blockerUp);
+                    robotHardware.sleep(1500);
                     stage++;
                     break;
                 case 100:
                     //pp-pp-pparkkk
+                    robotHardware.angleAdjustment = 20;
                     robotHardware.intakeOff();
                     shooterPower = 0;
                     robotHardware.wobbleClamp.setPosition(constants.clampClosed);
@@ -208,7 +215,7 @@ public class BlueOuter extends LinearOpMode {
 
                     }
                     else {
-                        movement.goToPoint(position == Rings.ZERO ? 68 : 151, position == Rings.ZERO ? 100 : 118, pipeline, 0.75);
+                        movement.goToPoint(position == Rings.ZERO ? 68 : 150, position == Rings.ZERO ? 100 : 96, pipeline, 0.75);
                     }
                     break;
                 default:

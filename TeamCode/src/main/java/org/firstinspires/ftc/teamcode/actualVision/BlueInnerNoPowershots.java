@@ -17,8 +17,8 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-@Autonomous(name = "Blue Inner", group = "Vision")
-public class BlueInner extends LinearOpMode {
+@Autonomous(name = "Blue Inner No Powershots", group = "Vision")
+public class BlueInnerNoPowershots extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
@@ -28,7 +28,7 @@ public class BlueInner extends LinearOpMode {
     int cameraMonitorViewId;
     int shooterPower;
     final int lowShooterPower = constants.shooterPower - 190;
-    final int highShooterPower = constants.shooterPower + 45;
+    final int highShooterPower = constants.shooterPower;
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -90,7 +90,7 @@ public class BlueInner extends LinearOpMode {
         int stage = 0;
         int prevStage = -1;
 
-        shooterPower = lowShooterPower;
+        shooterPower = highShooterPower;
         robotHardware.shooter.setVelocity(shooterPower);
         while(opModeIsActive() && !isStopRequested()) {
             movement.resetPower();
@@ -104,38 +104,33 @@ public class BlueInner extends LinearOpMode {
                 case 0:
                     robotHardware.drivePower(48, 0.75, false, 0, shooterPower);
                     robotHardware.strafePower(6, 0.75);
+                    robotHardware.angleAdjustment = -8;
                     stage++;
                     break;
                 case 1:
-                    //move to shooter position(100, 120)
-                    //wait to charge shooter?
-                    robotHardware.shooter.setVelocity(shooterPower);
-                    movement.goToPoint(100, 135, pipeline);
+                    movement.goToPoint(154, 130, pipeline);
                     if (elapsedTime.milliseconds() > 5000) {
                         stage++;
                     }
                     break;
                 case 2:
-                    //shoot initial three rings at below angles
-                    shooterPower = lowShooterPower;
-                    int[] angles = {-8, -12, -17};
-                    int[] times = {200, 300, 600};
-                    robotHardware.intakeOff();
-                    robotHardware.blocker.setPosition(constants.blockerUp);
-                    for (int i = 0; i < 3; i++) {
-                        shooterPower = lowShooterPower;
-                        robotHardware.shooter.setVelocity(shooterPower);
-                        robotHardware.turnTo(angles[i], 0.15);
-                        robotHardware.intake(0.5);
-                        robotHardware.sleep(times[i]);
-                        robotHardware.intakeOff();
+                case 6:
+                    //move to shooter position(135, 120)
+                    //shoot (up to) three rings into high goal(0 degrees/straight)
+                    if (robotHardware.blocker.getPosition() != constants.blockerUp)
+                        movement.goToPoint(146, 130, pipeline);
+                    if (movement.closeTo(146, 130, 15, pipeline) && robotHardware.getPowers() < 1.25 && movement.angleCloseTo(2.5)) {
+                        movement.shoot(shooterPower, 0.25);
                     }
-                    robotHardware.turnTo(0);
-                    stage++;
+                    if (elapsedTime.milliseconds() > 3000) {
+                        stage++;
+                        movement.block();
+                    }
+                    robotHardware.shooter.setVelocity(constants.shooterPower);
                     break;
                 case 3:
                     movement.goToPoint(135, 90, pipeline);
-                    if (elapsedTime.milliseconds() > 2000) {
+                    if (elapsedTime.milliseconds() > 4000) {
                         stage++;
                     }
                     break;
@@ -163,10 +158,11 @@ public class BlueInner extends LinearOpMode {
                         case FOUR:
                             robotHardware.turnTo(30);
                             robotHardware.wobbleArm.setPosition(constants.armDown);
-                            robotHardware.drivePower(38, 0.75, false, 45, shooterPower);
-                            robotHardware.turnTo(120);
+                            robotHardware.drivePower(42, 0.75, false, 45, shooterPower);
+                            robotHardware.turnTo(90);
                             robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                            robotHardware.strafePower(-17, -0.5);
+                            robotHardware.strafePower(-5, -0.5);
+                            robotHardware.drivePower(-12, -0.75, false, 90, shooterPower);
                             robotHardware.wobbleClamp.setPosition(constants.clampClosed);
                             robotHardware.wobbleArm.setPosition(constants.armUp);
                             robotHardware.turnTo(0);
@@ -209,22 +205,6 @@ public class BlueInner extends LinearOpMode {
                     }
                     robotHardware.intakeOff();
                     stage++;
-                    break;
-                case 6:
-                    //move to shooter position(135, 120)
-                    //shoot (up to) three rings into high goal(0 degrees/straight)
-                    robotHardware.angleAdjustment = -10;
-                    if (robotHardware.blocker.getPosition() != constants.blockerUp)
-                        movement.goToPoint(154, 130, pipeline);
-                    if (movement.closeTo(154, 130, 15, pipeline) && robotHardware.getPowers() < 1.25 && movement.angleCloseTo(2.5)) {
-                        movement.shoot();
-                        robotHardware.intakeOn();
-                    }
-                    if (elapsedTime.milliseconds() > 3000) {
-                        stage++;
-                        movement.block();
-                    }
-                    robotHardware.shooter.setVelocity(constants.shooterPower);
                     break;
                 case 100:
                     //wait back?

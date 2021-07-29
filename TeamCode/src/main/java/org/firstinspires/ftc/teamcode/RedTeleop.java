@@ -55,16 +55,14 @@ public class RedTeleop extends LinearOpMode {
             teleOpControls.eggs1();
             if (this.gamepad1.y) {
                 movement.resetPower();
-                if (teleOpControls.bPressed) {
-                    robotHardware.blocker.setPosition(constants.blockerUp);
-                    movement.turn = 0.175;
-                    if (robotHardware.getAngle() > 3)
-                        robotHardware.intakeOn();
+                if (pipeline.detected() && movement.angleCloseTo(10)) {
+                    if (teleOpControls.bPressed)
+                        movement.goToPoint(199, 120, pipeline);
                     else
-                        robotHardware.intakeOff();
+                        movement.goToPoint(133, (int) (124 - (pipeline.getAngle() * 1.25)), pipeline);
                 }
                 else
-                    movement.goToPoint(133, 124, pipeline);
+                    movement.turnTo(0);
                 movement.setPowers();
             }
             else {
