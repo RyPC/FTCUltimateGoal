@@ -17,7 +17,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.Arrays;
 
-//@Disabled
+@Disabled
 @Autonomous(name = "Odo", group = "Move")
 public class OdoThign extends LinearOpMode {
     

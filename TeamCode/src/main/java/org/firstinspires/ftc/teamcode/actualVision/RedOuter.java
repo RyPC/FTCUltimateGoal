@@ -99,6 +99,8 @@ public class RedOuter extends LinearOpMode {
 
             //reset timer when stage changes
             if (stage != prevStage) {
+                movement.ix = 0;
+                movement.iy = 0;
                 elapsedTime.reset();
                 prevStage = (int)stage;
             }

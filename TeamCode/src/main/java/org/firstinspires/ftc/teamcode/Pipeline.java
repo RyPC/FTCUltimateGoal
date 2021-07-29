@@ -44,11 +44,14 @@ public class Pipeline  extends OpenCvPipeline {
         Imgproc.circle(input, new Point(constants.ringWidth, constants.heightFour), 10, new Scalar(0, 0, 255, 0));
 
         //process ring values
-        double sensitivity = 2.5;
-        one = (getRed(Rings.ONE) + getGreen(Rings.ONE)) >= getBlue(Rings.ONE) * sensitivity;
-        four = (getRed(Rings.FOUR) + getGreen(Rings.FOUR)) >= getBlue(Rings.FOUR) * sensitivity;
-
+        one = checkOrange(RGB[0]);
+        four = checkOrange(RGB[1]);
         return input;
+    }
+
+    //checks if the given pixel is "orange"
+    public boolean checkOrange(double[] rgb) {
+        return rgb[0] > 90 && rgb[1] > rgb[2] * 1.4;
     }
 
     public int getRed(Rings rings) {

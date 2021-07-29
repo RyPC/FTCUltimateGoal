@@ -17,8 +17,8 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-@Autonomous(name = "New Blue Outer", group = "Vision")
-public class BlueOuterNew extends LinearOpMode {
+@Autonomous(name = "Red Inner No Powershots", group = "Vision")
+public class RedInnerNoPowershots extends LinearOpMode {
 
     RobotHardware robotHardware = new RobotHardware(this, telemetry);
     Constants constants = new Constants();
@@ -26,7 +26,7 @@ public class BlueOuterNew extends LinearOpMode {
     OpenCvCamera backboardCamera;
     OpenCvCamera ringCamera;
     int cameraMonitorViewId;
-    int shooterPower = constants.shooterPower - 15;
+    int shooterPower = constants.shooterPower + 20;
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -41,7 +41,7 @@ public class BlueOuterNew extends LinearOpMode {
         //set up ring camera
         ringCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.ringWebcam);
 
-        Pipeline ringPipeline = new Pipeline(Color.BLUE, Side.LEFT);
+        Pipeline ringPipeline = new Pipeline(Color.RED, Side.LEFT);
         ringCamera.setPipeline(ringPipeline);
 
         ringCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
@@ -59,6 +59,8 @@ public class BlueOuterNew extends LinearOpMode {
         while (!isStarted() && !isStopRequested()) {
             position = ringPipeline.getPosition();
             telemetry.addData("Position", position);
+            telemetry.addLine("Top RGB: [" + ringPipeline.getRed(Rings.FOUR) + ", " + ringPipeline.getGreen(Rings.FOUR) + ", " + ringPipeline.getBlue(Rings.FOUR) + "]");
+            telemetry.addLine("Bot RGB: [" + ringPipeline.getRed(Rings.ONE) + ", " + ringPipeline.getGreen(Rings.ONE) + ", " + ringPipeline.getBlue(Rings.ONE) + "]");
             telemetry.update();
         }
 
@@ -69,7 +71,7 @@ public class BlueOuterNew extends LinearOpMode {
 
         backboardCamera = OpenCvCameraFactory.getInstance().createWebcam(robotHardware.backboardWebcam, cameraMonitorViewId);
 
-        BackboardPipeline pipeline = new BackboardPipeline(Color.BLUE);
+        BackboardPipeline pipeline = new BackboardPipeline(Color.RED);
         backboardCamera.setPipeline(pipeline);
 
         backboardCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
@@ -101,101 +103,74 @@ public class BlueOuterNew extends LinearOpMode {
 
             switch (stage) {
                 case 0:
-                    //wobble goal
-                    robotHardware.shooter.setVelocity(shooterPower);
-                    switch (position) {
-                        case ZERO:
-                            robotHardware.turnTo(0);
-                            robotHardware.drivePower(53, 1, false, 0, shooterPower);
-                            robotHardware.turnTo(135);
-                            robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                            robotHardware.wobbleArm.setPosition(constants.armUp);
-                            robotHardware.sleep(500);
-                            robotHardware.strafePower(-12, -0.75);
-                            robotHardware.turnTo(0);
-                            robotHardware.shooter.setVelocity(shooterPower);
-                            break;
-                        case ONE:
-                            robotHardware.drivePower(95, 1, false, 0, shooterPower);
-                            robotHardware.placeWobble();
-                            robotHardware.strafePower(-5, -1);
-                            robotHardware.drivePower(-30, -1, false, 0, shooterPower);
-                            break;
-                        case FOUR:
-                            robotHardware.drivePower(104, 1, false, 0, shooterPower);
-                            robotHardware.turnTo(155, 1.5);
-                            robotHardware.wobbleClamp.setPosition(constants.clampOpen);
-                            robotHardware.wobbleArm.setPosition(constants.armUp);
-                            robotHardware.strafePower(-6, -1);
-                            robotHardware.turnTo(93);
-                            robotHardware.strafePower(-57, -1);
-                            break;
-                    }
-                    //make a permanent change to the angle to be at 20 degrees
+                    robotHardware.drivePower(52, 0.5, false, 0, shooterPower);
                     robotHardware.angleAdjustment = 20;
-                    robotHardware.turnTo(0, 0.5);
                     stage++;
                     break;
+                case 5:
                 case 1:
+                    //go to shooting position and charge shooter
                     movement.goToPoint(127, 132, pipeline);
-                    if (elapsedTime.milliseconds() > 3000) {
+                    if (elapsedTime.milliseconds() > 5000) {
                         stage++;
                     }
                     break;
+                case 6:
                 case 2:
                     //shoot
                     if (robotHardware.blocker.getPosition() != constants.blockerUp)
                         movement.goToPoint(127, 132, pipeline, 0.8);
                     if (movement.closeTo(127, 132, 15, pipeline)) {
-                        movement.shoot(shooterPower, 0.5);
+                        movement.shoot(shooterPower, 0.35);
                     }
                     if (elapsedTime.milliseconds() > 3250) {
-                        if (position != Rings.ZERO) {
-                            stage++;
-                            shooterPower = constants.shooterPower;
-                        }
-                        else {
-                            stage = 100;
-                            shooterPower = 0;
-                        }
-                        robotHardware.shooter.setVelocity(shooterPower);
-                        robotHardware.angleAdjustment = 10;
+                        stage++;
                         movement.block();
                     }
                     robotHardware.shooter.setVelocity(shooterPower);
                     break;
                 case 3:
-                    //get closer to stack
-                    movement.goToPoint(154, 200, pipeline);
+                    //line up for wobble
+                    movement.goToPoint(163, 106, pipeline);
                     if (elapsedTime.milliseconds() > 1000) {
                         stage++;
+                        robotHardware.angleAdjustment = 0;
                     }
                     break;
                 case 4:
-                    //line up behind stack
-                    movement.goToPoint(100, 192, pipeline);
-                    if (elapsedTime.milliseconds() > 3000) {
-                        stage++;
+                    //get bouncebacks
+                    robotHardware.turnTo(0);
+                    robotHardware.drivePower(48, 0.75, false, 0, shooterPower);
+                    robotHardware.drivePower(-2, -0.75, false, 0, shooterPower);
+                    robotHardware.turnTo(-90);
+                    robotHardware.drivePower(34, 0.75, false, -90, shooterPower);
+                    //place wobble
+                    switch (position) {
+                        case ZERO:
+                            robotHardware.strafePower(2, 0.75);
+                            robotHardware.turnTo(0);
+                            robotHardware.drivePower(-35, -0.5, false, 0, shooterPower);
+                            robotHardware.placeWobble();
+                            robotHardware.strafePower(-48, -0.75);
+                            break;
+                        case ONE:
+                            robotHardware.drivePower(-10, 0.75, false, -90, shooterPower);
+                            robotHardware.strafePower(4, 0.75);
+                            robotHardware.placeWobble();
+                            robotHardware.strafePower(-4, -0.75);
+                            robotHardware.drivePower(-24, -1, false, -90, shooterPower);
+                            robotHardware.strafePower(50, 0.75);
+                            break;
+                        case FOUR:
+                            robotHardware.strafePower(2, 0.75);
+                            robotHardware.turnTo(0);
+                            robotHardware.placeWobble();
+                            robotHardware.strafePower(-40, -0.75);
+                            robotHardware.drivePower(-40, -1, false, 0, shooterPower);
+                            break;
                     }
-                    break;
-                case 5:
-                    //collect stack while shooting
-                    robotHardware.intake(1);
-                    movement.block();
-                    robotHardware.drivePower(9, 0.1, false, 0, shooterPower);
-                    robotHardware.drivePower(-9, -0.2, false, 0, shooterPower);
-                    robotHardware.sleep(1500);
-                    robotHardware.blocker.setPosition(constants.blockerUp);
-                    robotHardware.cleanser.setPower(0.35);
-                    robotHardware.sleep(2500);
-                    robotHardware.blocker.setPosition(constants.blockerDown);
-                    shooterPower-= 50;
-                    robotHardware.shooter.setVelocity(shooterPower);
-                    robotHardware.drivePower(12, 0.25, false, 0, shooterPower);
-                    robotHardware.sleep(2000);
-                    robotHardware.turnTo(4, 0.5);
-                    robotHardware.blocker.setPosition(constants.blockerUp);
-                    robotHardware.sleep(1500);
+                    robotHardware.angleAdjustment = 20;
+                    robotHardware.turnTo(0, 0.75);
                     stage++;
                     break;
                 case 100:
@@ -206,7 +181,8 @@ public class BlueOuterNew extends LinearOpMode {
                     robotHardware.wobbleClamp.setPosition(constants.clampClosed);
                     robotHardware.wobbleArm.setPosition(constants.armUp);
                     robotHardware.shooter.setPower(0);
-                    if (totalTime.milliseconds() < 25000) {
+//                    if (totalTime.milliseconds() < 25000) {
+                    if (false) {
 
                         int x = (int)(30.0 * Math.cos(totalTime.milliseconds()  * 2 * Math.PI / 3000));
                         int y = (int)(20.0 * Math.sin(totalTime.milliseconds()  * 2 * Math.PI / 3000));
@@ -217,7 +193,7 @@ public class BlueOuterNew extends LinearOpMode {
 
                     }
                     else {
-                        movement.goToPoint(position == Rings.ZERO ? 68 : 150, position == Rings.ZERO ? 100 : 96, pipeline, 0.75);
+                        movement.goToPoint(165, 91, pipeline, 0.75);
                     }
                     break;
                 default:

@@ -59,7 +59,7 @@ public class Movement {
 
         //constants
         double kp = 1 / 80.0;
-        double ki = 1 / 2000000.0;
+        double ki = 1 / 50000000.0;
         double kd = 1 / 400.0;
 
         //proportional(delta x/y)
@@ -69,22 +69,22 @@ public class Movement {
         double px = deltaX * kp;
         double py = deltaY * kp;
 
-        //integral controller if within 20 units from intended spot
-        if (deltaX > 50 || deltaX <= 6)
-            ix = 0;
-        else
-            ix+= deltaX * ki;
-
-        if (deltaY > 50 || deltaY <= 6)
-            iy = 0;
-        else
-            iy+= deltaY * ki;
-
         //derivative controller
         dx = (x - prevX) * kd;
         dy = (y - prevY) * kd;
         prevX = currentX;
         prevY = currentY;
+
+        //integral controller if within 10 units from intended spot
+        if (deltaX > 10 || deltaX <= 2)
+            ix = 0;
+        else
+            ix+= deltaX * ki;
+
+        if (deltaY > 10 || deltaY <= 2)
+            iy = 0;
+        else
+            iy+= deltaY * ki;
 
         //set powers
 //        strafe = px + ix - dx;

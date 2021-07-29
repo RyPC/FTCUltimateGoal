@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.actualVision;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -21,6 +22,7 @@ import org.openftc.easyopencv.OpenCvViewport;
 
 import java.util.Arrays;
 
+@Disabled
 @Autonomous(name = "Red Outer Double Wobble", group = "Vision")
 public class RedOuterDoubleWobble extends LinearOpMode {
 
