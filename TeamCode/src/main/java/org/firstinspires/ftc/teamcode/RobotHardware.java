@@ -469,7 +469,7 @@ public class RobotHardware {
         double neededTicks = inches * constants.ticksPerTok;
         double currentTicks = 0;
         while (Math.abs(currentTicks - neededTicks) > 50 && op.opModeIsActive() && time.milliseconds() < 5000) {
-            currentTicks = fr.getCurrentPosition();
+            currentTicks = -fr.getCurrentPosition();
 
 //            double power1 = 0.25 + ((1.0 / 1890) * currentTicks);
 //            double power2 = -((1.0 / 1890) * currentTicks) + (0.25 + neededTicks / 1890);

@@ -26,7 +26,7 @@ public class RedInnerNoPowershots extends LinearOpMode {
     OpenCvCamera backboardCamera;
     OpenCvCamera ringCamera;
     int cameraMonitorViewId;
-    int shooterPower = constants.shooterPower + 20;
+    int shooterPower = constants.shooterPower + 50;
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -110,6 +110,7 @@ public class RedInnerNoPowershots extends LinearOpMode {
                 case 5:
                 case 1:
                     //go to shooting position and charge shooter
+                    robotHardware.intakeOff();
                     movement.goToPoint(127, 132, pipeline);
                     if (elapsedTime.milliseconds() > 5000) {
                         stage++;
@@ -141,29 +142,30 @@ public class RedInnerNoPowershots extends LinearOpMode {
                     //get bouncebacks
                     robotHardware.turnTo(0);
                     robotHardware.drivePower(48, 0.75, false, 0, shooterPower);
-                    robotHardware.drivePower(-2, -0.75, false, 0, shooterPower);
+                    robotHardware.drivePower(-1, -0.25, false, 0, shooterPower);
                     robotHardware.turnTo(-90);
                     robotHardware.drivePower(34, 0.75, false, -90, shooterPower);
                     //place wobble
                     switch (position) {
                         case ZERO:
-                            robotHardware.strafePower(2, 0.75);
-                            robotHardware.turnTo(0);
-                            robotHardware.drivePower(-35, -0.5, false, 0, shooterPower);
+                            robotHardware.drivePower(16, 0.75, false, -90, shooterPower);
+                            robotHardware.strafeTo(24, -90);
                             robotHardware.placeWobble();
-                            robotHardware.strafePower(-48, -0.75);
+                            robotHardware.drivePower(-48, -0.75, false, -75, shooterPower);
                             break;
                         case ONE:
-                            robotHardware.drivePower(-10, 0.75, false, -90, shooterPower);
-                            robotHardware.strafePower(4, 0.75);
+                            robotHardware.drivePower(-4, -0.75, false, -90, shooterPower);
+                            robotHardware.strafePower(8, 0.75);
                             robotHardware.placeWobble();
                             robotHardware.strafePower(-4, -0.75);
-                            robotHardware.drivePower(-24, -1, false, -90, shooterPower);
-                            robotHardware.strafePower(50, 0.75);
+                            robotHardware.drivePower(-18, -1, false, -90, shooterPower);
+                            robotHardware.strafePower(68, 0.75);
                             break;
                         case FOUR:
-                            robotHardware.strafePower(2, 0.75);
-                            robotHardware.turnTo(0);
+                            robotHardware.intakeOff();
+                            robotHardware.drivePower(-2, -0.5, false, -90, shooterPower);
+                            robotHardware.turnTo(0, 0.75);
+                            robotHardware.strafePower(13, 0.5);
                             robotHardware.placeWobble();
                             robotHardware.strafePower(-40, -0.75);
                             robotHardware.drivePower(-40, -1, false, 0, shooterPower);

@@ -28,7 +28,7 @@ public class BlueInnerNoPowershots extends LinearOpMode {
     int cameraMonitorViewId;
     int shooterPower;
     final int lowShooterPower = constants.shooterPower - 190;
-    final int highShooterPower = constants.shooterPower;
+    final int highShooterPower = constants.shooterPower + 100;
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -102,58 +102,76 @@ public class BlueInnerNoPowershots extends LinearOpMode {
 
             switch (stage) {
                 case 0:
-                    robotHardware.drivePower(48, 0.75, false, 0, shooterPower);
-                    robotHardware.strafePower(6, 0.75);
-                    robotHardware.angleAdjustment = -8;
+                    robotHardware.drivePower(48, 0.5, false, 0, shooterPower);
+                    robotHardware.strafePower(6, 0.5);
+                    robotHardware.angleAdjustment = -12;
                     stage++;
                     break;
+                case 6:
                 case 1:
-                    movement.goToPoint(154, 130, pipeline);
-                    if (elapsedTime.milliseconds() > 5000) {
+                    robotHardware.angleAdjustment = -12;
+                    movement.goToPoint(106, 144, pipeline);
+                    if (elapsedTime.milliseconds() > (stage == 1 ? 5000 : 2000)) {
                         stage++;
                     }
                     break;
                 case 2:
-                case 6:
-                    //move to shooter position(135, 120)
-                    //shoot (up to) three rings into high goal(0 degrees/straight)
-                    if (robotHardware.blocker.getPosition() != constants.blockerUp)
-                        movement.goToPoint(146, 130, pipeline);
-                    if (movement.closeTo(146, 130, 15, pipeline) && robotHardware.getPowers() < 1.25 && movement.angleCloseTo(2.5)) {
-                        movement.shoot(shooterPower, 0.25);
+                case 7:
+                    //move to shooter position(145, 130)
+                    //shoot rings into high goal
+                    robotHardware.angleAdjustment = -12;
+                    if (robotHardware.blocker.getPosition() != constants.blockerUp) {
+                        movement.goToPoint(106, 144, pipeline);
+                        robotHardware.intakeOff();
+                    }
+                    if (movement.closeTo(106, 144, 15, pipeline) && robotHardware.getPowers() < 1.25 && movement.angleCloseTo(2.5)) {
+                        movement.shoot(shooterPower, 0.35);
                     }
                     if (elapsedTime.milliseconds() > 3000) {
                         stage++;
+                        shooterPower = constants.shooterPower - 150;
                         movement.block();
+                        robotHardware.angleAdjustment = -8;
                     }
                     robotHardware.shooter.setVelocity(constants.shooterPower);
                     break;
                 case 3:
-                    movement.goToPoint(135, 90, pipeline);
-                    if (elapsedTime.milliseconds() > 4000) {
+                    movement.goToPoint(position == Rings.ONE ? 130 : 135, 90, pipeline);
+                    if (elapsedTime.milliseconds() > 2500) {
                         stage++;
+                        robotHardware.angleAdjustment = 0;
                     }
                     break;
                 case 4:
                     //deposit wobble goal
-                    shooterPower = highShooterPower;
                     robotHardware.shooter.setVelocity(shooterPower);
                     switch (position) {
                         case ZERO:
-                            robotHardware.turnTo(180);
-                            robotHardware.strafePower(20, 0.75);
-                            robotHardware.placeWobble();
-                            robotHardware.strafePower(-10, -0.75);
                             robotHardware.turnTo(0);
+                            robotHardware.strafePower(6, 0.75);
+                            robotHardware.drivePower(52, 0.33, false, 0, shooterPower);
+                            robotHardware.drivePower(-24, -0.33, false, 0, shooterPower);
+                            robotHardware.turnTo(-90);
+                            robotHardware.drivePower(-35, -0.5, false, -90, shooterPower);
+                            robotHardware.strafePower(13, 0.75);
+                            robotHardware.placeWobble();
+                            robotHardware.strafePower(-8, -0.75);
+                            robotHardware.drivePower(40, 1, false, -90, shooterPower);
+                            robotHardware.turnTo(0);
+                            robotHardware.drivePower(-38, -1, false, 0, shooterPower);
                             break;
                         case ONE:
-                            robotHardware.turnTo(45);
-                            robotHardware.drivePower(5, 0.33, false, 45, shooterPower);
-                            robotHardware.turnTo(100);
-                            robotHardware.placeWobble();
-                            robotHardware.turnTo(90);
-                            robotHardware.drivePower(-20, -0.5, false, 90, shooterPower);
                             robotHardware.turnTo(0);
+                            robotHardware.strafePower(6, 0.75);
+                            robotHardware.drivePower(52, 0.33, false, 0, shooterPower);
+                            robotHardware.drivePower(-24, -0.33, false, 0, shooterPower);
+                            robotHardware.turnTo(180, 0.5);
+                            robotHardware.strafePower(6, 0.5);
+                            robotHardware.placeWobble();
+                            robotHardware.strafePower(-6, -0.5);
+                            robotHardware.strafePower(-4, -0.5);
+                            robotHardware.turnTo(0);
+                            robotHardware.drivePower(-20, -0.5, false, 0, shooterPower);
                             break;
                         case FOUR:
                             robotHardware.turnTo(30);
@@ -174,36 +192,20 @@ public class BlueInnerNoPowershots extends LinearOpMode {
                     //collect bouncebacks
                     robotHardware.intakeOn();
                     robotHardware.turnTo(0);
-                    switch (position) {
-                        case ZERO:
-                            robotHardware.drivePower(38, 0.5, false, 0, shooterPower);
-                            robotHardware.turnTo(-90);
-                            robotHardware.drivePower(48, 0.5, false, -90, shooterPower);
-                            robotHardware.strafePower(5, 1);
-                            robotHardware.turnTo(-55);
-                            robotHardware.drivePower(6, 0.75, false, 0, shooterPower);
-                            robotHardware.turnTo(0);
-                            robotHardware.turnTo(-20);
-                            robotHardware.drivePower( -60, -0.75, false, -20, shooterPower);
-                            break;
-                        case ONE:
-                            robotHardware.drivePower(30, 0.25, false, 0, shooterPower);
-                            robotHardware.drivePower(-30, -0.25, false, 0, shooterPower);
-                            break;
-                        case FOUR:
-                            robotHardware.drivePower(18, 0.5, false, 0, shooterPower);
-                            robotHardware.turnTo(-90);
-                            robotHardware.drivePower(48, 0.5, false, -90, shooterPower);
-                            robotHardware.strafePower(5, 1);
-                            robotHardware.turnTo(-55);
-                            robotHardware.drivePower(4, 0.75, false, -55, shooterPower);
-                            robotHardware.turnTo(0);
-                            robotHardware.turnTo(-20);
-                            robotHardware.drivePower( -60, -0.75, false, -20, shooterPower);
-                            robotHardware.turnTo(0);
-                            break;
+                    if (position == Rings.FOUR) {
+                        robotHardware.drivePower(13, 0.5, false, 0, shooterPower);
+                        robotHardware.turnTo(-90);
+                        robotHardware.drivePower(28, 0.5, false, -90, shooterPower);
+                        robotHardware.strafePower(8, 1);
+                        robotHardware.turnTo(-55);
+                        robotHardware.drivePower(4, 0.75, false, -55, shooterPower);
+                        robotHardware.turnTo(0);
+                        robotHardware.turnTo(-20);
+                        robotHardware.drivePower( -60, -0.75, false, -20, shooterPower);
+                        robotHardware.turnTo(0);
                     }
                     robotHardware.intakeOff();
+                    robotHardware.turnTo(12);
                     stage++;
                     break;
                 case 100:
@@ -217,7 +219,8 @@ public class BlueInnerNoPowershots extends LinearOpMode {
 //                        movement.goToPoint());
                     }
                     else {
-                        movement.goToPoint(153, 90, pipeline);
+                        robotHardware.angleAdjustment = -14;
+                        movement.goToPoint(111, 96, pipeline);
                     }
                 default:
                     stage = 100;

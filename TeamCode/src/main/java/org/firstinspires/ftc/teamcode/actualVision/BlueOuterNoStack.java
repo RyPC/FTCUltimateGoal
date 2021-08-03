@@ -101,7 +101,7 @@ public class BlueOuterNoStack extends LinearOpMode {
                 case 0:
                     //wobble goal
                     robotHardware.shooter.setVelocity(0);
-                    robotHardware.sleep(7500);
+                    robotHardware.sleep(12500);
                     robotHardware.shooter.setVelocity(shooterPower);
                     robotHardware.sleep(2500);
                     switch (position) {

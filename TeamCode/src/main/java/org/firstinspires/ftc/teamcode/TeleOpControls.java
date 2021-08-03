@@ -14,7 +14,7 @@ public class TeleOpControls {
     RobotHardware robotHardware;
     Telemetry telemetry;
     Constants constants = new Constants();
-    int shooterSpeed = constants.shooterPower;
+    int shooterSpeed = constants.shooterPower + 300;
     boolean dPDPressed = false;
     boolean dPDDown = false;
     boolean rbPressed = true;
@@ -106,7 +106,7 @@ public class TeleOpControls {
             bDown = false;
         }
 
-        shooterSpeed = bPressed ? constants.shooterPower - 180: constants.shooterPower;
+        shooterSpeed = bPressed ? constants.shooterPower - 180: constants.shooterPower + 40;
 
         //changing angle with dpad right/left
         if (op.gamepad1.dpad_right && !dPRDown) {

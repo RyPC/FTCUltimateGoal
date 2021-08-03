@@ -57,7 +57,7 @@ public class BlueTeleop extends LinearOpMode {
                     if (teleOpControls.bPressed)
                         movement.goToPoint(199, 120, pipeline);
                     else
-                        movement.goToPoint(133, (int) (124 - (pipeline.getAngle() * 1.25)), pipeline);
+                        movement.goToPoint(133, (int) (124 + Math.abs((pipeline.getAngle() * 1.25))), pipeline);
                 }
                 else
                     movement.turnTo(0);

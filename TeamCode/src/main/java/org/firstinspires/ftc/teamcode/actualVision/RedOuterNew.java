@@ -170,7 +170,7 @@ public class RedOuterNew extends LinearOpMode {
                     }
                     break;
                 case 5:
-                    movement.goToPoint(172, 193, pipeline);
+                    movement.goToPoint(168, 196, pipeline);
                     if (elapsedTime.milliseconds() > 3000) {
                         robotHardware.turnTo(-10);
                         stage++;
@@ -182,7 +182,7 @@ public class RedOuterNew extends LinearOpMode {
                     movement.block();
                     switch (position) {
                         case FOUR:
-                            robotHardware.drivePower(12, 0.075, false, -10, shooterPower);
+                            robotHardware.drivePower(12, 0.125, false, -10, shooterPower);
                             robotHardware.intake(-0.5);
                             robotHardware.drivePower(-6, -0.2, false, -10, shooterPower);
                             robotHardware.intakeOn();
